@@ -1,0 +1,18 @@
+#cftp-dt-next li, #cftp-dt-answers li{
+	list-style: none;
+	display: inline-block;
+	margin: 1% 0;
+}
+#cftp-dt-next li{
+	width: 32%;
+}
+.cftp_dt_answer_link.btn{
+	width:98%;
+}
+
+#cftp-dt-answers{
+	display: block;
+}
+#cftp-dt-answers .cftp-dt-node-title{
+	display: inline;
+}
