@@ -103,7 +103,7 @@
 			// create the media frame
 			_media.frame = wp.media({
 				title		:	acf.l10n.image.edit,
-				multiple	:	false,
+				multiple	:	true,
 				button		:	{ text : acf.l10n.image.update }
 			});
 			
@@ -193,7 +193,7 @@
 				states : [
 					new wp.media.controller.Library({
 						library		:	wp.media.query( t.o.query ),
-						multiple	:	t.o.multiple,
+						multiple	:	true,
 						title		:	acf.l10n.image.select,
 						priority	:	20,
 						filterable	:	'all'
@@ -405,10 +405,10 @@
 	
 	
 	$(document).on('click', '.acf-image-uploader .add-image', function( e ){
-		
+		alert('aaaaa');
 		e.preventDefault();
 		
-		acf.fields.image.set({ $el : $(this).closest('.acf-image-uploader') }).popup();
+		//acf.fields.image.set({ $el : $(this).closest('.acf-image-uploader') }).popup();
 		
 	});
 	

@@ -505,8 +505,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		$vars[ 'content' ] = $content;
 		$vars[ 'answers' ] = $answers;
 		$vars[ 'answer_links' ] = $this->capture( 'content-answer-links.php', $vars );
-
 		add_filter( 'the_title', array( $this, 'filter_the_title' ), 0, 2 );
+
 
 		if ( $post->post_parent )
 			return $this->capture( 'content-with-history.php', $vars );

@@ -104,7 +104,7 @@
 			// create the media frame
 			_media.frame = wp.media({
 				title		:	acf.l10n.file.edit,
-				multiple	:	false,
+				multiple	:	true,
 				button		:	{ text : acf.l10n.file.update }
 			});
 			
@@ -197,7 +197,7 @@
 				states : [
 					new wp.media.controller.Library({
 						library		:	wp.media.query( t.o.query ),
-						multiple	:	t.o.multiple,
+						multiple	:	true,
 						title		:	acf.l10n.file.select,
 						priority	:	20,
 						filterable	:	'all'

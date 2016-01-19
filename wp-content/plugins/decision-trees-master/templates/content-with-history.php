@@ -1,7 +1,4 @@
 <?php defined( 'ABSPATH' ) or die(); ?>
-
-<?php //print_r(get_post_types()); ?>
-<?php //print_r(get_post_custom()); ?>
 <?php if ( $start ) : ?>
 	<div class="cftp-dt-restart">
 		<a href="<?php echo get_permalink( $start->ID ); ?>">restart</a>
@@ -52,9 +49,13 @@
 	<div class="input-group input-group-lg">
 		<span class="input-group-addon" id="basic-addon1">$</span>
       	<input type="number" class="form-control" value="<?php echo $customFields['Price'][0];?>" disabled>
+      	
+      	<?php if (function_exists('wpfp_link')):?>
       	<span class="input-group-btn">
-			<a href="javascript:void(0)" class="btn btn-primary">Add to selection</a></div>
+			<?php echo wpfp_link(1, '', false);?>
       	</span>
+		<?php endif;?>
+
     </div>
 	<?php endif;?>
 

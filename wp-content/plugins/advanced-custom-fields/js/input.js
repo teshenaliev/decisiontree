@@ -299,7 +299,7 @@ var acf = {
 		div : null,
 		frame : null,
 		render_timout : null,
-		
+		multiple	  : true,
 		clear_frame : function(){
 			
 			// validate
@@ -1590,7 +1590,7 @@ var acf = {
 			// create the media frame
 			_media.frame = wp.media({
 				title		:	acf.l10n.file.edit,
-				multiple	:	false,
+				multiple	:	true,
 				button		:	{ text : acf.l10n.file.update }
 			});
 			
@@ -1683,7 +1683,7 @@ var acf = {
 				states : [
 					new wp.media.controller.Library({
 						library		:	wp.media.query( t.o.query ),
-						multiple	:	t.o.multiple,
+						multiple	:	true,
 						title		:	acf.l10n.file.select,
 						priority	:	20,
 						filterable	:	'all'
@@ -2503,7 +2503,7 @@ var acf = {
 			// create the media frame
 			_media.frame = wp.media({
 				title		:	acf.l10n.image.edit,
-				multiple	:	false,
+				multiple	:	true,
 				button		:	{ text : acf.l10n.image.update }
 			});
 			
@@ -2593,7 +2593,7 @@ var acf = {
 				states : [
 					new wp.media.controller.Library({
 						library		:	wp.media.query( t.o.query ),
-						multiple	:	t.o.multiple,
+						multiple	:	true,
 						title		:	acf.l10n.image.select,
 						priority	:	20,
 						filterable	:	'all'
@@ -2805,7 +2805,6 @@ var acf = {
 	
 	
 	$(document).on('click', '.acf-image-uploader .add-image', function( e ){
-		
 		e.preventDefault();
 		
 		acf.fields.image.set({ $el : $(this).closest('.acf-image-uploader') }).popup();

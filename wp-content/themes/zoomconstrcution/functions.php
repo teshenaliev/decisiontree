@@ -237,6 +237,7 @@ function twentysixteen_scripts() {
 
 	//add bootstrap css
 	wp_enqueue_style( 'bootstrap-css', get_template_directory_uri() . '/css/bootstrap.min.css', array(), '3.3.6' );
+	wp_enqueue_style( 'swipe-css', get_template_directory_uri() . '/css/swipe.css', array(), '2.0' );
 
 	// Theme stylesheet.
 	wp_enqueue_style( 'twentysixteen-style', get_stylesheet_uri() );
@@ -250,7 +251,8 @@ function twentysixteen_scripts() {
 
 	wp_enqueue_script( 'twentysixteen-script', get_template_directory_uri() . '/js/functions.js', array( 'jquery' ), '20151204', true );
 
-	wp_enqueue_script( 'bootstrap-js', get_template_directory_uri() . '/js/bootstrap.min.js', array( 'jquery' ), '2.3.2', true );
+	wp_enqueue_script( 'bootstrap-js', get_template_directory_uri() . '/js/bootstrap.min.js', array( 'jquery' ), '3.3.6', true );
+	wp_enqueue_script( 'swipe-js', get_template_directory_uri() . '/js/swipe.js', array( 'jquery' ), '2.0', true );
 
 	wp_localize_script( 'twentysixteen-script', 'screenReaderText', array(
 		'expand'   => __( 'expand child menu', 'twentysixteen' ),
@@ -391,3 +393,18 @@ function twentysixteen_widget_tag_cloud_args( $args ) {
 	return $args;
 }
 add_filter( 'widget_tag_cloud_args', 'twentysixteen_widget_tag_cloud_args' );
+
+/*function wrap_images( $content ) {
+
+   // A regular expression of what to look for.
+   $pattern = '/(<img([^>]*)>)/i';
+   // What to replace it with. $1 refers to the content in the first 'capture group', in parentheses above
+   $replacement = "<div id='slider'>\n\t$1 \n</div>";
+
+   // run preg_replace() on the $content
+   $content = preg_replace( $pattern, $replacement, $content );
+
+   // return the processed content
+}
+
+add_filter( 'the_content', 'wrap_images' );*/
