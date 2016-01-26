@@ -178,7 +178,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 				$page_id = wp_insert_post( array(
 					'post_title'  => $title,
 					'post_type'   => $this->post_type,
-					'post_status' => 'draft',
+					'post_status' => 'publish',
 					'post_parent' => $post->ID,
 				) );
 				wp_update_post( array( 'ID' => $page_id, 'post_name' => sanitize_title_with_dashes( $answer['text'] ) ) );
@@ -352,6 +352,9 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		if ( $this->post_type != $post->post_type )
 			return;
 
+		$postAnswer =( isset( $_POST['_cftp_dt_answer_value']['simple']['text'] ) && strlen($_POST['_cftp_dt_answer_value']['simple']['text']) > 1) ? $_POST['_cftp_dt_answer_value']['simple']['text'] : $_POST['post_title'];
+		update_post_meta( $post->ID, '_cftp_dt_answer_value', $postAnswer );
+		update_post_meta( $post->ID, '_cftp_dt_answer_type', 'simple' );
 		if ( isset( $_POST["cftp_dt_post_{$post_id}_parent"] ) ) {
 
 			# See: http://core.trac.wordpress.org/ticket/8592
@@ -360,11 +363,24 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			# dropdown. We'll fix that manually.
 
 			$this->no_recursion = true;
+
+			$parentID = (absint( $_POST["cftp_dt_post_{$post_id}_parent"] =='0' && $_POST["parent_id"] > 0 ) || ($_POST["parent_id"] > 0 && $_POST["cftp_dt_post_{$post_id}_parent"] != $_POST["parent_id"])) ? $_POST["parent_id"] : $_POST["cftp_dt_post_{$post_id}_parent"];
+
 			wp_update_post( array(
 				'ID'          => $post->ID,
-				'post_parent' => absint( $_POST["cftp_dt_post_{$post_id}_parent"] ),
+				'post_parent' => $parentID ,
 			) );
 			$this->no_recursion = false;
+
+
+			//update parent meta data to make a tree
+			if (absint( $_POST["cftp_dt_post_{$post_id}_parent"] =='0' && $_POST["parent_id"] > 0 ) || ($_POST["parent_id"] > 0 && $_POST["cftp_dt_post_{$post_id}_parent"] != $_POST["parent_id"])){
+				$parentAnswers = get_post_meta($_POST["parent_id"], '_cftp_dt_answers', true);
+				if (!in_array($post_id, $parentAnswers)){
+					$parentAnswers[] = $post_id;
+					update_post_meta($_POST["parent_id"], '_cftp_dt_answers', $parentAnswers);
+				}
+			}
 
 		}
 
@@ -387,7 +403,6 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 					foreach ( $answer_meta as $k => $v )
 						update_post_meta( $page->ID, $k, $v );
-
 				}
 			}
 
@@ -415,7 +430,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 						$page_id = wp_insert_post( array(
 							'post_title'  => $title,
 							'post_type'   => $this->post_type,
-							'post_status' => 'draft',
+							'post_status' => 'publish',
 							'post_parent' => $post->ID,
 						) );
 						wp_update_post( array( 'ID' => $page_id, 'post_name' => sanitize_title_with_dashes( $answer['text'] ) ) );
@@ -429,7 +444,6 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 					foreach ( $answer_meta as $k => $v )
 						update_post_meta( $page->ID, $k, $v );
-
 				}
 			}
 
@@ -562,6 +576,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 		$vars = array();
 		$vars[ 'answers' ] = cftp_dt_get_post_answers( $post->ID );
+		$vars[ 'meta_data' ] = get_post_meta($post->ID );
+		$this->render_admin( 'meta-box-current-answer.php', $vars );
 		$this->render_admin( 'meta-box-answers.php', $vars );
 	}
 
@@ -658,7 +674,6 @@ function cftp_dt_get_post_answers( $post_id = null ) {
 		return array();
 
 	$answers = get_post_meta( $post->ID, '_cftp_dt_answers', true );
-
 	if ( empty( $answers ) )
 		$answers = array();
 

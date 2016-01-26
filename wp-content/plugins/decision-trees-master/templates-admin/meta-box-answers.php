@@ -36,6 +36,7 @@
 	<?php foreach ( $answers as $answer_id => $answer ) : ?>
 
 		<?php
+		$answer->get_answer_type();
 		if ( !( $provider = $this->get_answer_provider( $answer->get_answer_type() ) ) )
 			continue;
 		?>

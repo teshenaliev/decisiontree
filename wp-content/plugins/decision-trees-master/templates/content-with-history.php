@@ -1,4 +1,6 @@
-<?php defined( 'ABSPATH' ) or die(); ?>
+<?php defined( 'ABSPATH' ) or die();
+$customFields = get_post_meta($post->ID);
+?>
 <?php if ( $start ) : ?>
 	<div class="cftp-dt-restart">
 		<a href="<?php echo get_permalink( $start->ID ); ?>">restart</a>
@@ -7,7 +9,7 @@
 
 <ol id="cftp-dt-answers">
 
-	<?php 
+	<?php
 		foreach ( $previous_answers as $previous_answer ) :
 			$previous_answer = get_post( $previous_answer );
 			if ( ! $previous_answer->post_parent )
@@ -22,28 +24,16 @@
 			</li>
 	<?php endforeach; ?>
 		<li class="cftp-dt-current">
-
-			<?php 
-				$answer = new CFTP_DT_Answer( get_the_ID() );
-				$provider = $this->get_answer_provider( $answer->get_answer_type() );
-			?>
-
 			<h3 class="cftp-dt-current"><?php echo $title; ?></h3>
-
 		</li>
 
 </ol>
 
 <div class="cftp-dt-content">
-
-	<?php 
-		$answer = new CFTP_DT_Answer( get_the_ID() );
-		$provider = $this->get_answer_provider( $answer->get_answer_type() );
-		$customFields = get_post_custom();
-	?>
-
-	<div class="cftp-dt-content"><?php echo $content; ?></div>
-	<?php if (isset($customFields['Price'])):?>
+	<div class="cftp-dt-content">
+		<?php echo $content; ?>
+	</div>
+	<?php if (isset($customFields['Price'][0]) && $customFields['Price'][0]>0 && is_numeric($customFields['Price'][0])):?>
 	<div class="cftp-dt-add-to-selection">
 
 	<div class="input-group input-group-lg">

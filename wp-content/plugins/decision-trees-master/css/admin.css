@@ -29,8 +29,7 @@
 }
 
 #cftp_dt_visualiser_add_answer,
-#pageparentdiv p:first-child,
-#parent_id {
+#pageparentdiv p:first-child {
 	display: none;
 }
 
