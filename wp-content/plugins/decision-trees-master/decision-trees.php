@@ -283,28 +283,21 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$post_status['inherit']
 		);
 
-		$tree = array();
-		$tree[0] = get_pages( array(
+		$tree = get_pages( array(
 			'post_type'   => $this->post_type,
 			'post_status' => $post_status,
 			'sort_column' => 'menu_order,post_title',
 			'parent'      => 0,
 		) );
-
-		$tree = $this->populate_tree( $tree );
-
-		$max = 0;
-		foreach ( $tree as $nodes )
-			$max = max( $max, count( $nodes ) );
+		foreach($tree as $key => $singleTree){
+			$this->populate_tree( $tree, $key );
+		};
 
 		$vars['tree'] = $tree;
-		$vars['max']  = $max;
-
-		$this->render_admin( 'visualise.php', $vars );
+		$this->render_admin( 'visualise-tree.php', $vars );
 
 	}
-
-	function populate_tree( $tree, $level = 0 ) {
+	function populate_tree( &$tree, $treeKey = 0 ) {
 
 		# @TODO D.R.Y.:
 		$post_status = get_post_stati();
@@ -313,31 +306,19 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$post_status['auto-draft'],
 			$post_status['inherit']
 		);
+		$children = get_posts( array(
+			'post_type'   => $this->post_type,
+			'post_status' => $post_status,
+			'post_parent' => $tree[$treeKey]->ID # This is required when using the 'parent' arg and is a WP bug. @TODO: file it
+		) );
 
-		foreach ( $tree[$level] as $page ) {
-
-			$children = get_pages( array(
-				'post_type'   => $this->post_type,
-				'post_status' => $post_status,
-				'sort_column' => 'menu_order,post_title',
-				'parent'      => $page->ID,
-				'child_of'    => $page->ID, # This is required when using the 'parent' arg and is a WP bug. @TODO: file it
-			) );
-
-			$page->level = $level;
-
-			if ( !empty( $children ) ) {
-
-				if ( !isset( $tree[$level+1] ) )
-					$tree[$level+1] = array();
-				$tree[$level+1] = array_merge( $tree[$level+1], $children );
-				$tree = $this->populate_tree( $tree, $level+1 );
-
+		if ( !empty( $children ) ) {
+			$tree[$treeKey]->children = $children;
+			foreach($tree[$treeKey]->children as $childKey => $child){
+				$tree[$treeKey]->children[$childKey]->metadata = get_post_meta($child->ID);
+				$this->populate_tree( $tree[$treeKey]->children, $childKey );
 			}
-
 		}
-
-		return $tree;
 
 	}
 
@@ -351,8 +332,14 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			return;
 		if ( $this->post_type != $post->post_type )
 			return;
-
-		$postAnswer =( isset( $_POST['_cftp_dt_answer_value']['simple']['text'] ) && strlen($_POST['_cftp_dt_answer_value']['simple']['text']) > 1) ? $_POST['_cftp_dt_answer_value']['simple']['text'] : $_POST['post_title'];
+		
+		$postAnswer = '';
+		if ( isset( $_POST['_cftp_dt_answer_value']['simple']['text'] ) && strlen($_POST['_cftp_dt_answer_value']['simple']['text']) > 1){
+			$postAnswer = $_POST['_cftp_dt_answer_value']['simple']['text'];
+		}
+		else if (isset($_POST['post_title'])){
+			$postAnswer = $_POST['post_title'];
+		}
 		update_post_meta( $post->ID, '_cftp_dt_answer_value', $postAnswer );
 		update_post_meta( $post->ID, '_cftp_dt_answer_type', 'simple' );
 		if ( isset( $_POST["cftp_dt_post_{$post_id}_parent"] ) ) {
@@ -475,6 +462,12 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			'cftp-dt-admin',
 			$this->plugin_url( 'js/admin.js' ),
 			array( 'jquery', 'jquery.jsPlumb', 'thickbox' ),
+			$this->plugin_ver( 'js/admin.js' )
+		);
+		wp_enqueue_script(
+			'cftp-dt-google-chart',
+			'https://www.gstatic.com/charts/loader.js',
+			array( 'jquery'),
 			$this->plugin_ver( 'js/admin.js' )
 		);
 

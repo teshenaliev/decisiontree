@@ -5,7 +5,13 @@
 </p>
 
 <div id="cftp_dt_current_answer">
-
+		<?php if (isset($_GET['parent_id']) && $_GET['parent_id']>0):?>
+		<script type="text/javascript">
+			jQuery(function(){
+				jQuery('#parent_id').val(<?php echo $_GET['parent_id'];?>);
+			});
+		</script>
+		<?php endif; ?>
 
 		<div class="add_answer" data-answer-type="<?php echo esc_attr( $provider_name ); ?>">
 			<div class="answer_field">
