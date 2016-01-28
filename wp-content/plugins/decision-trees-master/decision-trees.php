@@ -144,6 +144,18 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		if ( isset( $_POST['action'] ) and ( 'cftp_dt_add_answer' == $_POST['action'] ) )
 			$this->process_add_answer();
 
+		
+		if (current_user_can('editor')){
+			add_filter( 'admin_body_class', array($this,'add_admin_body_class') );	
+		}
+		wp_enqueue_style(
+			'cftp-dt-admin',
+			$this->plugin_url( 'css/admin.css' )
+		);
+	}
+
+	function add_admin_body_class( $classes ) {
+    	return "$classes user-type-editor";
 	}
 	
 	function process_add_answer() {

@@ -72,3 +72,7 @@
 .cftp_dt_node_highlighted {
 	border-color: #999;
 }
+
+.user-type-editor #adminmenu .menu-icon-post, .user-type-editor #adminmenu .menu-icon-comments, .user-type-editor #adminmenu .menu-icon-tools, .user-type-editor #adminmenu .menu-icon-page{
+	display:none;
+}
