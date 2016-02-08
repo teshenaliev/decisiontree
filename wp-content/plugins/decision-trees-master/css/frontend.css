@@ -16,3 +16,7 @@
 #cftp-dt-answers .cftp-dt-node-title{
 	display: inline;
 }
+.create-user-container,.select-user-container{
+	width: 49%;
+	float:left;
+}

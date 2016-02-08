@@ -1,5 +1,6 @@
 <?php defined( 'ABSPATH' ) or die();
-$customFields = get_post_custom(); ?>
+$customFields = get_post_custom();
+ ?>
 <ol id="cftp-dt-answers">
 	<li class="cftp-dt-current">
 		<h3 class="cftp-dt-current"><?php echo $title; ?></h3>
@@ -7,7 +8,7 @@ $customFields = get_post_custom(); ?>
 </ol>
 <div class="cftp-dt-content">
 	<div class="cftp-dt-content">
-		<?php echo $content; ?>
+			<?php echo $content; ?>
 	</div>
 	<?php if (isset($customFields['Price']) && $customFields['Price']>0 && !is_array($customFields['Price'])):?>
 	<div class="cftp-dt-add-to-selection">

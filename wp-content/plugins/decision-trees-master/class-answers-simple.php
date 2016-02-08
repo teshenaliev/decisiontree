@@ -92,6 +92,10 @@ class CFTP_DT_Answers_Simple {
 	 * @return string
 	 **/
 	public function get_answer( CFTP_DT_Answer $answer ) {
+		$questionType = $answer->get_question_type();
+		if ($questionType=='checkbox'){
+			
+		}
 		return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">%2$s</a>',
 			get_permalink( $answer->get_post()->ID ),
 			$answer->get_answer_value()

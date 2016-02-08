@@ -49,8 +49,10 @@ Domain Path: /languages/
 defined( 'ABSPATH' ) or die();
 
 require_once dirname( __FILE__ ) . '/class-plugin.php';
+require_once dirname( __FILE__ ) . '/ClientWidget.php';
 require_once dirname( __FILE__ ) . '/class-answers-simple.php';
-
+if(session_id() == '')
+     session_start();
 /**
  * Decision Trees
  *
@@ -105,9 +107,9 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		add_action( 'save_post',             array( $this, 'action_save_post' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'action_admin_enqueue_scripts' ) );
 		add_action( 'wp_enqueue_scripts', 	 array( $this, 'action_enqueue_scripts' ) );
+		add_action( 'widgets_init', 		 array( $this, 'action_register_widget') );
 		add_action( 'admin_menu',            array( $this, 'action_admin_menu' ) );
 		add_action( 'admin_notices',         array( $this, 'action_admin_notices' ) );
-
 		# Filters
 		add_filter( 'the_content',           array( $this, 'filter_the_content' ) );
 		add_filter( 'the_title',             array( $this, 'filter_the_title' ), 0, 2 );
@@ -283,6 +285,15 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			array( $this, 'admin_page_visualise' )
 		);
 
+		add_submenu_page(
+			'edit.php?post_type=decision_node',
+			__( 'Client list', 'cftp_dt' ),
+			__( 'Client list', 'cftp_dt' ),
+			$pto->cap->edit_posts,
+			'quesionnaire_list',
+			array( $this, 'admin_page_quesionnaire_list' )
+		);
+
 	}
 
 	function admin_page_visualise() {
@@ -307,6 +318,21 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 		$vars['tree'] = $tree;
 		$this->render_admin( 'visualise-tree.php', $vars );
+	}
+
+	function admin_page_quesionnaire_list() {
+		if (!isset($_GET['user_id'])){
+			$vars['user_list'] = $this->get_user_list_with_meta();
+			$this->render_admin( 'client-list.php', $vars );
+		}
+		else{
+			$currentUser = $this->get_user_with_meta(1);
+			$vars['current_user'] = $currentUser;
+			$vars['questionnaire-list'] = json_decode($currentUser->meta_data['wpfp_favorites'][0]);
+			print_r($currentUser);
+			echo 'aaaa';print_r(json_decode($currentUser->meta_data['wpfp_favorites'][0]));
+			//$this->render_admin( 'questionnaire-list.php', $vars );
+		}
 
 	}
 	function populate_tree( &$tree, $treeKey = 0 ) {
@@ -494,9 +520,34 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$this->plugin_ver( 'css/admin.css' )
 		);
 
+
+		wp_enqueue_script(
+			'cftp-dt-admin',
+			$this->plugin_url( 'js/script.js' ),
+			array( 'jquery'),
+			$this->plugin_ver( 'js/script.js' )
+		);
+
+	}
+
+	function action_register_widget() {
+
+		register_widget( 'DT_ClientWidget' );
+
 	}
 
 	function filter_the_content( $content ) {
+		if (is_user_logged_in()){
+			$currenUser = wp_get_current_user();
+			if ($currenUser->roles[0]=='administrator' || $currenUser->roles[0]=='editor'){
+				if (isset($_GET['select_user']) && $_GET['select_user'] == 'true' && is_numeric($_GET['user_id'])){
+					$_SESSION['client_id'] = $_GET['user_id'];
+				}
+				if (isset($_GET['sign_out_client']) && $_GET['sign_out_client']=='true'){
+					unset($_SESSION['client_id']);
+				}
+			}
+		}
 
 		global $post;
 
@@ -526,8 +577,11 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		$vars[ 'answer_links' ] = $this->capture( 'content-answer-links.php', $vars );
 		add_filter( 'the_title', array( $this, 'filter_the_title' ), 0, 2 );
 
+		$vars['user_list'] = $this->get_user_list_with_meta();
 
-		if ( $post->post_parent )
+		if (!isset($_SESSION['client_id']) || !$_SESSION['client_id'])
+			return $this->capture( 'content-select-client.php', $vars );
+		else if ( $post->post_parent )
 			return $this->capture( 'content-with-history.php', $vars );
 		else
 			return $this->capture( 'content-no-history.php', $vars );
@@ -668,6 +722,25 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 	}
 
+	function get_user_list_with_meta()
+	{
+		$userList = get_users(array(
+			'fields'=>array('ID','display_name','user_email'),
+			'role'=>'Subscriber'
+			));
+		foreach ($userList as $key=>$singleUser){
+			$userList[$key]->meta_data = get_user_meta($singleUser->ID);
+		}
+		return $userList;
+	}
+
+	function get_user_with_meta($ID)
+	{
+		$currentUser = get_user_by('ID',$ID);
+		$currentUser->meta_data = get_user_meta($currentUser->ID);
+		return $currentUser;
+	}
+
 }
 
 // Initiate the singleton
@@ -721,6 +794,10 @@ class CFTP_DT_Answer {
 
 	function get_answer_type() {
 		return get_post_meta( $this->post->ID, '_cftp_dt_answer_type', true );
+	}
+
+	function get_question_type() {
+		return get_post_meta( $this->post->ID, 'question_type', true );
 	}
 
 }
