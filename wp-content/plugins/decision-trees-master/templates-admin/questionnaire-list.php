@@ -6,16 +6,14 @@
 	<table class="widefat fixed striped pages">
 	<thead>
 		<tr>
-			<th class="row-title"><?php _e('Client name','cftp_dt');?></th>
-			<th class="row-title"><?php _e('Address','cftp_dt');?></th>
+			<th class="row-title"><?php _e('Quesionnaire name','cftp_dt');?></th>
 			<th class="row-title"><?php _e('Action','cftp_dt');?></th>
 		</tr>
 	</thead>
 	<tbody>
-		<?php foreach($user_list as $key=>$singleUser):?>
+		<?php foreach($questionnaire_list as $key=>$singleQuestionnaire):?>
 		<tr>
-			<th><a href="http://<?php  echo $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . '&user_id=' .  $singleUser->ID;?>"><?php echo $singleUser->display_name;?></a></th>
-			<th><?php echo $singleUser->meta_data['wp_client_address'][0];?></th>
+			<th><a href="http://<?php  echo $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] . '&user_id=' .  $singleQuestionnaire;?>"><?php echo $singleQuestionnaire;?></a></th>
 			<th>aaaa</th>
 		</tr>
 		<?php endforeach;?>

@@ -328,10 +328,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		else{
 			$currentUser = $this->get_user_with_meta(1);
 			$vars['current_user'] = $currentUser;
-			$vars['questionnaire-list'] = json_decode($currentUser->meta_data['wpfp_favorites'][0]);
-			print_r($currentUser);
-			echo 'aaaa';print_r(json_decode($currentUser->meta_data['wpfp_favorites'][0]));
-			//$this->render_admin( 'questionnaire-list.php', $vars );
+			$vars['questionnaire_list'] = unserialize($currentUser->meta_data['wpfp_favorites'][0]);
+			$this->render_admin( 'questionnaire-list.php', $vars );
 		}
 
 	}
