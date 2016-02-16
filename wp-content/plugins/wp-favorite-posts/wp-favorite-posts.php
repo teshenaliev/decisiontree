@@ -28,7 +28,8 @@ Author URI: https://github.com/hberberoglu
 */
 
 define('WPFP_PATH', plugins_url() . '/wp-favorite-posts');
-define('WPFP_META_KEY', "wpfp_favorites");
+//define('WPFP_META_KEY', "wpfp_favorites");
+define('WPFP_META_KEY', "questionnaire_tree");
 define('WPFP_USER_OPTION_KEY', "wpfp_useroptions");
 define('WPFP_COOKIE_KEY', "wp-favorite-posts");
 
@@ -186,14 +187,18 @@ function wpfp_link_html($post_id, $opt, $action) {
     if ($action=='remove'){
         $class = 'btn-danger';
     }
-    $link = "<a href='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn $class' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
+    if ($action=='add'){
+    $link = "<a href='javascript:void(0)' ajaxurl='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
+    }
+    else{
+    $link = "<a href='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
+    }
     $link = apply_filters( 'wpfp_link_html', $link );
     return $link;
 }
 
 function wpfp_get_users_favorites($user = "") {
     $favorite_post_ids = array();
-
     if (!empty($user)):
         return wpfp_get_user_meta($user);
     endif;
@@ -292,18 +297,32 @@ function wpfp_clear_favorites() {
 }
 
 function wpfp_do_remove_favorite($post_id) {
-    if (!wpfp_check_favorited($post_id))
-        return true;
-
     $a = true;
     if (is_user_logged_in()) {
-        $user_favorites = wpfp_get_user_meta();
-        $user_favorites = array_diff($user_favorites, array($post_id));
-        $user_favorites = array_values($user_favorites);
-        $a = wpfp_update_user_meta($user_favorites);
+        
+        $bbb = $_SESSION['questionnaire_tree'];
+        $result = _changeQuestionnaireValue($post_id, array('value'=>null), $bbb);
+        $_SESSION['questionnaire_tree'] = $bbb;
+        return update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
     }
     if ($a) $a = wpfp_set_cookie($_REQUEST['postid'], "");
-    return $a;
+        return $a;
+}
+
+function _changeQuestionnaireValue($postID, $params, &$questionnaireTree)
+{
+    foreach($questionnaireTree as $postKey => $singleQuestion){
+        if ($singleQuestion['ID']==$postID){
+            foreach($params as $key => $value){
+                $questionnaireTree[$postKey][$key] = $value;
+            }
+            return true;
+        }
+        if (isset($singleQuestion['children'])){
+            _changeQuestionnaireValue($postID, $params, $questionnaireTree[$postKey]['children']);
+        }
+    }
+    return false;
 }
 
 function wpfp_content_filter($content) {
@@ -411,19 +430,35 @@ function wpfp_get_options() {
 function wpfp_get_user_id() {
     global $current_user;
     get_currentuserinfo();
-    return $current_user->ID;
+    return $_SESSION['client_id'];
 }
 
 function wpfp_get_user_meta($user = "") {
     if (!empty($user)):
         $userdata = get_user_by( 'login', $user );
-        $user_id = $userdata->ID;
-        return get_user_meta($user_id, WPFP_META_KEY, true);
+        $user_id = $_SESSION['client_id'];
+        $fullQuestionnaireTree = get_user_meta($user_id, WPFP_META_KEY, true);
+        $something = array();
+        getQuestionsWithAsnwers($fullQuestionnaireTree,$something);
+        return $something;
     else:
-        return get_user_meta(wpfp_get_user_id(), WPFP_META_KEY, true);
+        $fullQuestionnaireTree = get_user_meta(wpfp_get_user_id(), WPFP_META_KEY, true);
+        $something = array();
+        getQuestionsWithAsnwers($fullQuestionnaireTree,$something);
+        return $something;
     endif;
 }
-
+function getQuestionsWithAsnwers($fullQuestionnaireTree,&$returnValue)
+{
+    foreach ($fullQuestionnaireTree as $key => $singleQuestion) {
+        if (is_numeric($singleQuestion['value']) && $singleQuestion['value'] > 0){
+            $returnValue[] = $singleQuestion;
+        }
+        if (isset($singleQuestion['children'])){
+            getQuestionsWithAsnwers($singleQuestion['children'], $returnValue);
+        }
+    }
+}
 function wpfp_get_post_meta($post_id) {
     $val = get_post_meta($post_id, WPFP_META_KEY, true);
     if ($val < 0) $val = 0;

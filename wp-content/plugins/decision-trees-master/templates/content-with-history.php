@@ -48,6 +48,25 @@ $customFields = get_post_meta($post->ID);
 
     </div>
 	<?php endif;?>
+    <?php if (isset($customFields['required']) && $customFields['required'][0]=='1'):?>
+	<div class="cftp-dt-add-value">
+
+		<div class="input-group input-group-lg">
+
+			<span class="input-group-addon" id="basic-addon1">units</span>
+	      	<input type="number" class="form-control" value="<?php echo (isset($question_user_meta['value']) && $question_user_meta['value']>0) ? $question_user_meta['value'] : '';?>">
+	      	
+	      	<?php if (function_exists('wpfp_link')):?>
+	      	<span class="input-group-btn">
+				<?php echo wpfp_link(1, '', false);?>
+				<a href="javascript:void(0)" class="btn btn-warning action-skip"><?php _e('Skip','cftp_dt')?></a>
+				<a href="javascript:void(0)" class="btn btn-danger action-ignore"><?php _e('Ignore','cftp_dt')?></a>
+	      	</span>
+			<?php endif;?>
+
+	    </div>
+    </div>
+	<?php endif;?>
 
 	<?php if ( $answer_links ) : echo $answer_links; endif; ?>
 

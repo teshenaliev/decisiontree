@@ -26,7 +26,7 @@ class DT_ClientWidget extends WP_Widget {
 			$start = null;
 			global $post;
 			$previous_answers = array();
-			if ( $post->post_parent ) {
+			if ( isset($post->post_parent) ) {
 				$previous_answers = array_reverse( get_post_ancestors( $post->ID ) );
 				$previous_answers[] = get_the_ID();
 				$start = array_shift( $previous_answers );

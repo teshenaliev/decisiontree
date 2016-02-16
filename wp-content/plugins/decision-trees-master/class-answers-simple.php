@@ -83,7 +83,6 @@ class CFTP_DT_Answers_Simple {
 			__( 'Answer link text', 'cftp_dt' )
 		);
 	}
-	
 	/**
 	 * @TODO
 	 *
@@ -92,14 +91,42 @@ class CFTP_DT_Answers_Simple {
 	 * @return string
 	 **/
 	public function get_answer( CFTP_DT_Answer $answer ) {
-		$questionType = $answer->get_question_type();
-		if ($questionType=='checkbox'){
-			
+		$questionMeta = $answer->get_all_meta();
+		$questionUserMeta = $answer->get_user_meta();
+		if (isset($questionMeta['selectable'][0]) && $questionMeta['selectable'][0]==1){
+			if ($questionUserMeta['visited']!='1'){?>
+			<div class="checkbox checkbox-primary btn btn-warning btn-large">
+                <input id="decision-tree-<?php echo $answer->post->ID;?>" type="checkbox" <?php echo (isset($questionUserMeta['selected']) && $questionUserMeta['selected']==1)?'checked':'';?>>
+                <label for="decision-tree-<?php echo $answer->post->ID;?>">
+                    <?php echo $answer->get_answer_value()?></a>
+                </label>
+            </div>
+			<?php }
+			else{
+				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+						%2$s</a>',
+					get_permalink( $answer->get_post()->ID ),
+					$answer->get_answer_value()
+				);
+			}
 		}
-		return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">%2$s</a>',
-			get_permalink( $answer->get_post()->ID ),
-			$answer->get_answer_value()
-		);
+		else{
+			if (isset($questionMeta['sequence'][0]) && $questionMeta['sequence'][0]==1){
+				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> 
+					%2$s</a>',
+				get_permalink( $answer->get_post()->ID ),
+				$answer->get_answer_value()
+				);
+			}
+			else{
+				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">%2$s</a>',
+				get_permalink( $answer->get_post()->ID ),
+				$answer->get_answer_value()
+				);
+			}
+		}
 	}
 	
 	/**

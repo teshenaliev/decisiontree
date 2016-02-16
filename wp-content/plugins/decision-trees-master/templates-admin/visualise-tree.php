@@ -1,5 +1,5 @@
 <?php function outputTree($post){
-	$outputString = "[{v:'".$post->ID."',f:'<h3>".$post->post_title."</h3>";
+	$outputString = "[{v:'".$post->ID."',f:'<h3>".str_replace("'", "\'", $post->post_title)."</h3>";
 	//price
 	$outputString .= (isset($post->metadata['Price'][0]) && $post->metadata['Price'][0]>0) ? '<p>$' . $post->metadata['Price'][0] . '</p>':'';
 	//buttons

@@ -50,6 +50,7 @@ defined( 'ABSPATH' ) or die();
 
 require_once dirname( __FILE__ ) . '/class-plugin.php';
 require_once dirname( __FILE__ ) . '/ClientWidget.php';
+require_once dirname( __FILE__ ) . '/QuestionnaireController.php';
 require_once dirname( __FILE__ ) . '/class-answers-simple.php';
 if(session_id() == '')
      session_start();
@@ -68,7 +69,10 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	 **/
 	public $version;
 	
+	public $QuestionnaireController;
+	
 	public $post_type = 'decision_node';
+	public $post_status;
 
 	public $no_recursion = false;
 
@@ -114,7 +118,16 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		add_filter( 'the_content',           array( $this, 'filter_the_content' ) );
 		add_filter( 'the_title',             array( $this, 'filter_the_title' ), 0, 2 );
 
+		add_action( 'wp_ajax_ajax', 		 array( $this, 'ajax_controller' ));
+
 		$this->version = 3;
+		$this->QuestionnaireController = new QuestionnaireController($this);
+		$this->post_status = get_post_stati();
+		unset(
+			$this->post_status['trash'],
+			$this->post_status['auto-draft'],
+			$this->post_status['inherit']
+		);
 
 		parent::__construct( __FILE__ );
 	}
@@ -309,13 +322,13 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		$tree = get_pages( array(
 			'post_type'   => $this->post_type,
 			'post_status' => $post_status,
-			'sort_column' => 'menu_order,post_title',
+			'orderby'     => 'ID',
+			'order'       => 'ASC',
 			'parent'      => 0,
 		) );
 		foreach($tree as $key => $singleTree){
 			$this->populate_tree( $tree, $key );
 		};
-
 		$vars['tree'] = $tree;
 		$this->render_admin( 'visualise-tree.php', $vars );
 	}
@@ -343,9 +356,12 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$post_status['inherit']
 		);
 		$children = get_posts( array(
-			'post_type'   => $this->post_type,
-			'post_status' => $post_status,
-			'post_parent' => $tree[$treeKey]->ID # This is required when using the 'parent' arg and is a WP bug. @TODO: file it
+			'posts_per_page'=> -1,
+			'post_type'   	=> $this->post_type,
+			'post_status' 	=> $this->post_status,
+			'orderby'       => 'ID',
+			'order'         => 'ASC',
+			'post_parent' 	=> $tree[$treeKey]->ID # This is required when using the 'parent' arg and is a WP bug. @TODO: file it
 		) );
 
 		if ( !empty( $children ) ) {
@@ -520,14 +536,37 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 
 		wp_enqueue_script(
-			'cftp-dt-admin',
+			'cftp-dt-frontend-js',
 			$this->plugin_url( 'js/script.js' ),
 			array( 'jquery'),
 			$this->plugin_ver( 'js/script.js' )
 		);
 
+		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
+		wp_localize_script( 'cftp-dt-frontend-js', 'my_ajax_object',
+            array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'action' => 'ajax' ) );
+
 	}
 
+	function ajax_controller()
+	{
+		if (isset($_POST['operation']) && $_POST['operation']=='save-selectable'){
+			$this->QuestionnaireController->saveSelectableQuestions();
+		}
+		if (isset($_POST['operation']) && $_POST['operation']=='get-next-sequence-url'){
+			$this->QuestionnaireController->getNextSequenceUrl();
+		}
+		if (isset($_POST['operation']) && $_POST['operation']=='save-value'){
+			$this->QuestionnaireController->saveQuestionValue();
+		}
+		if (isset($_POST['operation']) && $_POST['operation']=='skip-value'){
+			$this->QuestionnaireController->skipQuestionValue();
+		}
+		if (isset($_POST['operation']) && $_POST['operation']=='ignore-value'){
+			$this->QuestionnaireController->ignoreQuestionValue();
+		}
+		wp_die();
+	}
 	function action_register_widget() {
 
 		register_widget( 'DT_ClientWidget' );
@@ -535,19 +574,28 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	}
 
 	function filter_the_content( $content ) {
+
+		global $post;
+
 		if (is_user_logged_in()){
 			$currenUser = wp_get_current_user();
 			if ($currenUser->roles[0]=='administrator' || $currenUser->roles[0]=='editor'){
 				if (isset($_GET['select_user']) && $_GET['select_user'] == 'true' && is_numeric($_GET['user_id'])){
 					$_SESSION['client_id'] = $_GET['user_id'];
+					$this->QuestionnaireController->initializeQuestinonnaireTree($_SESSION['client_id']);
 				}
 				if (isset($_GET['sign_out_client']) && $_GET['sign_out_client']=='true'){
 					unset($_SESSION['client_id']);
+					unset($_SESSION['client_idquestionnaire_tree']);
+					unset($_SESSION['questionnaire_tree']);
 				}
+				if (isset($_SESSION['client_id']) && isset($_SESSION['client_id'])){
+					$this->QuestionnaireController->changeQuestionnaireValue($post->ID,array('visited'=>true));
+					$vars[ 'question_user_meta' ] = $this->QuestionnaireController->getCurrentPostUserData( $post->ID );
+				}
+				//echo 'xxxx:';print_r($_SESSION);
 			}
 		}
-
-		global $post;
 
 		if ( $this->post_type != $post->post_type )
 			return $content;
@@ -749,7 +797,24 @@ function cftp_dt_get_post_answers( $post_id = null ) {
 	if ( ! $post = get_post( $post_id ) )
 		return array();
 
-	$answers = get_post_meta( $post->ID, '_cftp_dt_answers', true );
+	$post_status = get_post_stati();
+	unset(
+		$post_status['trash'],
+		$post_status['auto-draft'],
+		$post_status['inherit']
+	);
+	$children = get_posts( array(
+			'posts_per_page'=> -1,
+			'post_type'   	=> 'decision_node',
+			'post_status' 	=> $post_status,
+			'orderby'       => 'ID',
+			'order'         => 'ASC',
+			'post_parent' 	=> $post->ID # This is required when using the 'parent' arg and is a WP bug. @TODO: file it
+		) );
+	$answers = array();
+	foreach ($children as $singlePost){
+		$answers[] = $singlePost->ID;
+	}
 	if ( empty( $answers ) )
 		$answers = array();
 
@@ -773,9 +838,10 @@ function cftp_dt_get_previous_answers( $post_id = null ) {
 
 
 class CFTP_DT_Answer {
-
+	private $QuestionnaireController;
 	function __construct( $post_id ) {
 		$this->post = get_post( $post_id );
+		$this->QuestionnaireController = new QuestionnaireController(null, $this);
 	}
 
 	function get_post() {
@@ -796,6 +862,17 @@ class CFTP_DT_Answer {
 
 	function get_question_type() {
 		return get_post_meta( $this->post->ID, 'question_type', true );
+	}
+
+	function get_all_meta() {
+		return get_post_meta( $this->post->ID );
+	}
+	function get_user_meta() {
+		return $this->QuestionnaireController->getCurrentPostUserData($this->post->ID);
+
+	}
+	function get_meta_by_key($key) {
+		return get_post_meta( $this->post->ID, $key, true );
 	}
 
 }

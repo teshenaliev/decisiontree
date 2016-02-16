@@ -25,7 +25,25 @@ $customFields = get_post_custom();
 
     </div>
 	<?php endif;?>
+	<?php if (isset($customFields['Required']) && $customFields['Required'][0]=='1'):?>
+	<div class="cftp-dt-add-value">
 
-	<?php if ( $answer_links ) : echo $answer_links; endif; ?>
+		<div class="input-group input-group-lg">
+			<span class="input-group-addon" id="basic-addon1">$</span>
+	      	<input type="number" class="form-control" value="<?php echo $customFields['Value'][0];?>">
+	      	
+	      	<?php if (function_exists('wpfp_link')):?>
+	      	<span class="input-group-btn">
+				<?php echo wpfp_link(1, '', false);?>
+	      	</span>
+			<?php endif;?>
+
+	    </div>
+    </div>
+	<?php endif;?>
+
+	<?php if ( $answer_links ) : 
+		echo $answer_links; 
+	endif; ?>
 
 </div>

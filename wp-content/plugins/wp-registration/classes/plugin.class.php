@@ -521,7 +521,8 @@ class NM_WPRegistration extends NM_Framwork_V1_wpregistration{
 	}
 
 	function nm_page_attributes($post_id){
-		update_post_meta($post_id, 'nm_members', $_POST['nm_for_members']);		
+		if (isset($_POST['nm_for_members']))
+			update_post_meta($post_id, 'nm_members', $_POST['nm_for_members']);		
 		//wpregistration_pa($_POST);exit;
 	}	
 	
