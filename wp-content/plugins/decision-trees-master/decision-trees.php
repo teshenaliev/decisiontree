@@ -678,8 +678,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	}
 
 	function filter_the_title( $title, $post ) {
-		if (!is_user_logged_in() || (!isset($_SESSION['client_id']) || !$_SESSION['client_id']))
-			return;
+		/*if (!is_user_logged_in() || (!isset($_SESSION['client_id']) || !$_SESSION['client_id']))
+			return;*/
 		if ( is_admin() )
 			return $title;
 
