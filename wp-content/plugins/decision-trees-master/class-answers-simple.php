@@ -94,15 +94,7 @@ class CFTP_DT_Answers_Simple {
 		$questionMeta = $answer->get_all_meta();
 		$questionUserMeta = $answer->get_user_meta();
 		if (isset($questionMeta['selectable'][0]) && $questionMeta['selectable'][0]==1){
-			if ($questionUserMeta['visited']!='1'){?>
-			<div class="checkbox checkbox-primary btn btn-warning btn-large">
-                <input id="decision-tree-<?php echo $answer->post->ID;?>" type="checkbox" <?php echo (isset($questionUserMeta['selected']) && $questionUserMeta['selected']==1)?'checked':'';?>>
-                <label for="decision-tree-<?php echo $answer->post->ID;?>">
-                    <?php echo $answer->get_answer_value()?></a>
-                </label>
-            </div>
-			<?php }
-			else{
+			if (isset($questionUserMeta['selected']) && $questionUserMeta['selected']=='1'){
 				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
 						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
 						%2$s</a>',
@@ -110,6 +102,14 @@ class CFTP_DT_Answers_Simple {
 					$answer->get_answer_value()
 				);
 			}
+			else{?>
+				<span class="cftp_dt_answer_link btn btn-warning btn-large">
+	                <input id="decision-tree-<?php echo $answer->post->ID;?>" type="checkbox" <?php echo (isset($questionUserMeta['selected']) && $questionUserMeta['selected']==1)?'checked':'';?>>
+	                <label for="decision-tree-<?php echo $answer->post->ID;?>">
+	                    <?php echo $answer->get_answer_value()?></a>
+	                </label>
+	            </span>
+			<?php }
 		}
 		else{
 			if (isset($questionMeta['sequence'][0]) && $questionMeta['sequence'][0]==1){

@@ -51,7 +51,9 @@ defined( 'ABSPATH' ) or die();
 require_once dirname( __FILE__ ) . '/class-plugin.php';
 require_once dirname( __FILE__ ) . '/ClientWidget.php';
 require_once dirname( __FILE__ ) . '/QuestionnaireController.php';
+require_once dirname( __FILE__ ) . '/ExportController.php';
 require_once dirname( __FILE__ ) . '/class-answers-simple.php';
+require_once dirname( __FILE__ ) . '/libraries/phpexcel/PHPExcel.php';
 if(session_id() == '')
      session_start();
 /**
@@ -70,6 +72,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	public $version;
 	
 	public $QuestionnaireController;
+	public $ExportController;
 	
 	public $post_type = 'decision_node';
 	public $post_status;
@@ -105,6 +108,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	public function __construct() {
 
 		# Actions
+		add_action('export_report', 		 array( $this, 'export_report_callback') );
 		add_action( 'admin_init',            array( $this, 'action_admin_init' ) );
 		add_action( 'init',                  array( $this, 'action_init' ) );
 		add_action( 'add_meta_boxes',        array( $this, 'action_add_meta_boxes' ), 10, 2 );
@@ -117,8 +121,10 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		# Filters
 		add_filter( 'the_content',           array( $this, 'filter_the_content' ) );
 		add_filter( 'the_title',             array( $this, 'filter_the_title' ), 0, 2 );
+		//add_filter('show_admin_bar', 		'__return_false');
 
 		add_action( 'wp_ajax_ajax', 		 array( $this, 'ajax_controller' ));
+
 
 		$this->version = 3;
 		$this->QuestionnaireController = new QuestionnaireController($this);
@@ -154,6 +160,9 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	 * @author Simon Wheatley
 	 **/
 	function action_admin_init() {
+		if (isset($_GET['export']) && $_GET['export']==true){
+	        do_action('export_report');
+	    }
 		$this->maybe_update();
 
 		if ( isset( $_POST['action'] ) and ( 'cftp_dt_add_answer' == $_POST['action'] ) )
@@ -167,6 +176,12 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			'cftp-dt-admin',
 			$this->plugin_url( 'css/admin.css' )
 		);
+	}
+
+	function export_report_callback()
+	{
+		$this->ExportController = new ExportController($this);
+		$this->ExportController->exportReport();
 	}
 
 	function add_admin_body_class( $classes ) {
@@ -250,7 +265,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		$args = array(
 			'labels' => array(
 				'label'              => __( 'Decision Node', 'cftp_dt' ),
-				'name_admin_bar'     => _x( 'Decision Node', 'add new on admin bar', 'cftp_dt' ),
+				'name_admin_bar'     => __( 'Decision Node', 'add new on admin bar', 'cftp_dt' ),
 				'name'               => __( 'Decision Trees', 'cftp_dt' ),
 				'singular_name'      => __( 'Decision Node', 'cftp_dt' ),
 				'add_new'            => __( 'Add New Node', 'cftp_dt' ),
@@ -318,14 +333,18 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$post_status['auto-draft'],
 			$post_status['inherit']
 		);
-
-		$tree = get_pages( array(
-			'post_type'   => $this->post_type,
-			'post_status' => $post_status,
-			'orderby'     => 'ID',
-			'order'       => 'ASC',
-			'parent'      => 0,
-		) );
+		if (!isset($_GET['post_id'])){
+			$tree = get_pages( array(
+				'post_type'   => $this->post_type,
+				'post_status' => $post_status,
+				'orderby'     => 'ID',
+				'order'       => 'ASC',
+				'parent'      => 0,
+			) );
+		}
+		else{
+			$tree[] = get_post( $_GET['post_id'] );
+		}
 		foreach($tree as $key => $singleTree){
 			$this->populate_tree( $tree, $key );
 		};
@@ -338,10 +357,30 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$vars['user_list'] = $this->get_user_list_with_meta();
 			$this->render_admin( 'client-list.php', $vars );
 		}
-		else{
-			$currentUser = $this->get_user_with_meta(1);
+		else if (isset($_GET['user_id']) && isset($_GET['post_id'])){
+			$currentUser = $this->get_user_with_meta($_GET['user_id']);
+			//updating
+			if (isset($_POST['client_id'])){
+				$values  = array();
+				if (is_numeric($_POST['value']) && $_POST['value'] > 0){
+					$values['value'] = $_POST['value'];
+				} 
+				if (is_numeric($_POST['price']) && $_POST['price'] > 0){
+					$values['price'] = $_POST['price'];
+				} 
+				$vars['update_successfull'] = $this->QuestionnaireController->saveQuestionValues($_POST['client_id'], $_POST['post_id'], unserialize($currentUser->meta_data['questionnaire_tree'][0]), $values);
+
+				$currentUser = $this->get_user_with_meta($_GET['user_id']);
+			}
+
 			$vars['current_user'] = $currentUser;
-			$vars['questionnaire_list'] = unserialize($currentUser->meta_data['wpfp_favorites'][0]);
+			$vars['current_question_user_meta'] = $this->QuestionnaireController->getCurrentPostUserData($_GET['post_id'], unserialize($currentUser->meta_data['questionnaire_tree'][0]));
+			$this->render_admin( 'edit-questionnaire.php', $vars );
+		}
+		else{
+			$currentUser = $this->get_user_with_meta($_GET['user_id']);
+			$vars['current_user'] = $currentUser;
+			$vars['questionnaireUserMeta'] = unserialize($currentUser->meta_data['questionnaire_tree'][0]);
 			$this->render_admin( 'questionnaire-list.php', $vars );
 		}
 
@@ -595,6 +634,9 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 				}
 				//echo 'xxxx:';print_r($_SESSION);
 			}
+			if ($currenUser->roles[0]!='administrator'){
+				show_admin_bar( false );
+			}
 		}
 
 		if ( $this->post_type != $post->post_type )
@@ -624,7 +666,9 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		add_filter( 'the_title', array( $this, 'filter_the_title' ), 0, 2 );
 
 		$vars['user_list'] = $this->get_user_list_with_meta();
-
+		if (!is_user_logged_in()){
+			return $this->capture( 'content-login.php', $vars );
+		}
 		if (!isset($_SESSION['client_id']) || !$_SESSION['client_id'])
 			return $this->capture( 'content-select-client.php', $vars );
 		else if ( $post->post_parent )
@@ -634,6 +678,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	}
 
 	function filter_the_title( $title, $post ) {
+		if (!is_user_logged_in() || (!isset($_SESSION['client_id']) || !$_SESSION['client_id']))
+			return;
 		if ( is_admin() )
 			return $title;
 

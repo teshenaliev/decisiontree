@@ -223,9 +223,9 @@ class NM_WPRegistration extends NM_Framwork_V1_wpregistration{
 		$referrer = $_SERVER['HTTP_REFERER'];
 		if ( !empty($referrer) && !strstr($referrer,'wp-login') && !strstr($referrer,'wp-admin') ) {
 			if ( !strstr($referrer,'?login=failed') ) { 
-				wp_redirect( add_query_arg( 'login', 'failed', $referrer ) );
+				//wp_redirect( add_query_arg( 'login', 'failed', $referrer ) );
 			} else {
-				wp_redirect( $referrer );
+				//wp_redirect( $referrer );
 			}
 			exit;
 		}
@@ -238,9 +238,9 @@ class NM_WPRegistration extends NM_Framwork_V1_wpregistration{
         $referrer = $_SERVER['HTTP_REFERER'];
         if ( $referrer && $user==null ) { 
             if ( !strstr($referrer,'?login=empty') ) { 
-                wp_redirect( add_query_arg( 'login', 'empty', $referrer ));
+                //wp_redirect( add_query_arg( 'login', 'empty', $referrer ));
             } else {
-                wp_redirect( $referrer );
+                //wp_redirect( $referrer );
             }
         }
     }

@@ -188,10 +188,10 @@ function wpfp_link_html($post_id, $opt, $action) {
         $class = 'btn-danger';
     }
     if ($action=='add'){
-    $link = "<a href='javascript:void(0)' ajaxurl='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
+    $link = "<a href='javascript:void(0)' ajaxurl='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn btn-xs $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
     }
     else{
-    $link = "<a href='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
+    $link = "<a href='?wpfpaction=".$action."&amp;postid=". $post_id . "' class='btn btn-xs $class action-".$action."' title='". $opt ."' rel='nofollow'>". $opt ."</a>";
     }
     $link = apply_filters( 'wpfp_link_html', $link );
     return $link;

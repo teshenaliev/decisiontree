@@ -1,16 +1,17 @@
-<?php function outputTree($post){
+<?php function outputTree($post, $firstLine = false)
+{
 	$outputString = "[{v:'".$post->ID."',f:'<h3>".str_replace("'", "\'", $post->post_title)."</h3>";
 	//price
 	$outputString .= (isset($post->metadata['Price'][0]) && $post->metadata['Price'][0]>0) ? '<p>$' . $post->metadata['Price'][0] . '</p>':'';
 	//buttons
-	$outputString .= '<div class="button-group"><a href="'. get_bloginfo('url').'/wp-admin/post-new.php?post_type=decision_node&parent_id='.$post->ID.'" class="button button-small">Add New</a><a href="'.get_edit_post_link( $post->ID ).'" class="button button-small">Edit</a></div>\'}';
+	$outputString .= '<div class="button-group"><a href="'. get_bloginfo('url').'/wp-admin/post-new.php?post_type=decision_node&parent_id='.$post->ID.'" class="button button-small">Add New</a><a href="'.get_edit_post_link( $post->ID ).'" class="button button-small">Edit</a><a href="?post_type=decision_node&page=cftp_dt_visualise&post_id='. $post->ID .'" class="button button-small">Tree</a></div>\'}';
 	//parent
-	$outputString .= ", '".$post->post_parent."'],\n";
+  $outputString .= ($firstLine == true) ? ",''],\n":", '".$post->post_parent."'],\n";
 
-	echo $outputString;
+	echo  $outputString;
 	if (isset($post->children) && count($post->children)>0){
 		foreach($post->children as $key=>$singlePost){
-    		outputTree($singlePost);
+    		outputTree($singlePost, false);
     	}
 	}	
 }
@@ -30,7 +31,7 @@
         data.addRows([
         	<?php 
         	foreach($tree as $key=>$singlePost){
-        		outputTree($singlePost);
+        		outputTree($singlePost, true);
         	};?>
         	]
         );

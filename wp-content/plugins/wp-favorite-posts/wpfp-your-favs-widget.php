@@ -5,7 +5,7 @@ if ($favorite_post_ids) {
 	$favorite_post_ids = array_reverse($favorite_post_ids);
     $total = 0;
     if (count($favorite_post_ids )>0){ ?>
-        <table class="table table-condensed table-striped">
+        <table class="favorite-post-list table table-condensed table-striped">
         <thead>
             <tr>
                 <th>Selection</th>
@@ -19,7 +19,7 @@ if ($favorite_post_ids) {
             if ($c++ == $limit) break;
             $p = get_post($posts['ID']);?>
             <tr>
-                <td><a href="<?php echo get_permalink($posts['ID']);?> " title="<?php echo $p->post_title ?>"><?php echo  $p->post_title ;?></a></td>
+                <td><a href="<?php echo get_permalink($posts['ID']);?> " title="<?php echo $p->post_title ?>"><?php echo substr($p->post_title, 0, 10).'...';?></a></td>
                 <td><?php if (isset($customFields['value'])){
                     $total += $posts['value'];
                     echo $posts['value'];
@@ -27,12 +27,8 @@ if ($favorite_post_ids) {
                 <td><?php echo wpfp_get_remove_link($posts['ID'], 1,0);?></td> 
             </tr> 
         <?php }?>
-        <tfoot>
-        <tr>
-            <th>Total:</th>
-            <th colspan="2"><?php echo number_format($total, '2', ',', ' ');?></th>
-        </tr>
-        </tfoot>
+        </tbody>
+        </table>
     <?php }
 }
 else{

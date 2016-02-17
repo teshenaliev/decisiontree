@@ -38,6 +38,7 @@ jQuery(function($){
 					else
 						//console.log(resp);
 						$("#nm-saving-form-meta").html(resp.message).css('color', 'green');
+						location.reload();
 				}
 				
 			}, 'json');

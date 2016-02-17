@@ -35,7 +35,7 @@ jQuery(function($){
 		        success: function(data){
 		        	data = jQuery.parseJSON( data );
 	            	if (data.result == 'success'){
-	            		window.location = data.value;
+	            		location.reload();
 	            	}
 		        }
 		    });

@@ -76,3 +76,16 @@
 .user-type-editor #adminmenu .menu-icon-post, .user-type-editor #adminmenu .menu-icon-comments, .user-type-editor #adminmenu .menu-icon-tools, .user-type-editor #adminmenu .menu-icon-page{
 	display:none;
 }
+.widefat td.level-0, .widefat th.level-0
+{
+	padding-left:10px;
+}
+.widefat td.level-1, .widefat th.level-1{
+	padding-left:30px;
+}
+.widefat td.level-2, .widefat th.level-2{
+	padding-left:50px;
+}
+.widefat td.level-3, .widefat th.level-3{
+	padding-left:70px;
+}

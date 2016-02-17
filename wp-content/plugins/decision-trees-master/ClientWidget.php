@@ -47,7 +47,7 @@ class DT_ClientWidget extends WP_Widget {
 			<?php if ($currenUser->roles[0]=='administrator' || $currenUser->roles[0]=='editor'):?>
 			<tr>
 				<th><?php _e('Action','cftp_dt');?></th>
-				<td><a href="javascript:void(0)" redirect-url="<?php echo ($start!=null) ? get_permalink( $start->ID ):''; ?>" class="btn btn-primary sign-out-client-button"><?php _e('Sign out','cftp_dt');?></a></td>
+				<td><a href="javascript:void(0)" redirect-url="<?php echo ($start!=null) ? get_permalink( $start->ID ):''; ?>" class="btn btn-primary btn-xs sign-out-client-button"><?php _e('Sign out','cftp_dt');?></a></td>
 			</tr>
 			<?php endif ;?>
 			<?php 

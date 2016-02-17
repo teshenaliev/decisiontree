@@ -16,15 +16,14 @@ class QuestionnaireController
 	public function saveSelectableQuestions()
 	{
 		$postIDs = explode(',',$_POST['id']);
+		$bbb = $_SESSION['questionnaire_tree'];
 		foreach ($postIDs  as $singlePostID){
-			$bbb = $_SESSION['questionnaire_tree'];
 			$result = $this->_changeQuestionnaireValue($singlePostID,array('selected'=>true), $bbb);
-			$_SESSION['questionnaire_tree'] = $bbb;
-			update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
 		}
+		$_SESSION['questionnaire_tree'] = $bbb;
+		update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
 		echo json_encode(array('result'=>'success','value'=>$this->getNextPageUrl($_SESSION['questionnaire_tree'], 'selectable')));
 	}
-
 	public function saveQuestionValue()
 	{
 		$bbb = $_SESSION['questionnaire_tree'];
@@ -34,6 +33,21 @@ class QuestionnaireController
 		;
 		echo json_encode(array('result'=>'success','value'=>$this->getNextSiblingUrl($_POST['current-post-id'],$_SESSION['questionnaire_tree'])));
 
+	}
+
+	public function saveQuestionValues($clientID, $postID, $questionnaireTree, $params)
+	{
+		$result = $this->_changeQuestionnaireValue($postID, $params, $questionnaireTree);
+		return update_user_meta($clientID,'questionnaire_tree',$questionnaireTree);
+
+	}
+
+	public function changeQuestionnaireValue($postID, $params)
+	{
+		$bbb = $_SESSION['questionnaire_tree'];
+		$result = $this->_changeQuestionnaireValue($postID, $params, $bbb);
+		$_SESSION['questionnaire_tree'] = $bbb;
+		return update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
 	}
 
 	public function skipQuestionValue()
@@ -58,7 +72,7 @@ class QuestionnaireController
 
 	}
 
-	public function initializeQuestinonnaireTree($clientID, $forcePopulate = true)
+	public function initializeQuestinonnaireTree($clientID, $forcePopulate = false)
 	{
 		$currentUser = $this->DecisionTree->get_user_with_meta($clientID);
 		if (isset($currentUser->meta_data['questionnaire_tree'][0]) && $forcePopulate == false){
@@ -75,9 +89,28 @@ class QuestionnaireController
 		$this->getNextPageUrl($_SESSION['questionnaire_tree'], 'sequence','sibling');
 	}
 
-	public function getCurrentPostUserData($postID)
+	public function getCurrentPostUserData($postID,$questionnaireTree = null)
 	{
-		return $this->_getCurrentPostUserData($postID, $_SESSION['questionnaire_tree']);
+		return $this->_getCurrentPostUserData($postID, (($questionnaireTree == null)?$_SESSION['questionnaire_tree']:$questionnaireTree));
+	}
+
+	public function getAnsweredQuestions($questionnaireTree)
+	{
+		$returnValue = array();
+		$this->_getAnsweredQuestions($questionnaireTree, $returnValue);
+		return $returnValue;
+	}
+	public function getUnAnsweredQuestions($questionnaireTree)
+	{
+		$returnValue = array();
+		$this->_getUnAnsweredQuestions($questionnaireTree, $returnValue);
+		return $returnValue;
+	}
+	public function getAnsweredQuestionsWithParent($questionnaireTree)
+	{
+		$returnValue = array();
+		$this->_getAnsweredQuestionsWithParent($questionnaireTree, $returnValue, '');
+		return $returnValue;
 	}
 
 	private function populateQuestinonnaireTree($clientID)
@@ -120,14 +153,6 @@ class QuestionnaireController
 			if (isset($singlePost->children))
 				$this->reduceQuestionnaireTree( $singlePost->children, $returnArray[$key]['children'] );
 		}
-	}
-
-	public function changeQuestionnaireValue($postID, $params)
-	{
-		$bbb = $_SESSION['questionnaire_tree'];
-		$result = $this->_changeQuestionnaireValue($postID, $params, $bbb);
-		$_SESSION['questionnaire_tree'] = $bbb;
-		return update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
 	}
 
 	private function _changeQuestionnaireValue($postID, $params, &$questionnaireTree)
@@ -188,31 +213,63 @@ class QuestionnaireController
 			foreach($questionnaireTree as $postKey => $singleQuestion){
 				if (isset($singleQuestion['children'])){
 					$returnedValue = $this->getNextSiblingUrl($postID, $questionnaireTree[$postKey]['children']);
-					//echo "\n r:".$returnedValue;
 					if ($parentLevel == true){
 						return $singleQuestion['guid'];
 					}
 					if ($returnedValue === -2){
-						//echo 'bbb:';
 						$parentLevel = true;
 					}
 					else if ($returnedValue != false){
-						//echo 'ccc:';
 						return $returnedValue;
 					}
 				}
 			}
 			if ($parentLevel == true){
-				//echo 'ddd:'.$questionnaireTree[0]['post_parent'];
 				return -2;
 			}
 		}
 		else if($currentLevel == true){
-			//echo 'ddz:'.$questionnaireTree[0]['post_parent'];
 			return -2;
 		}
 		return false;
 	}
+
+	private function _getAnsweredQuestions($tree, &$returnArray)
+	{
+		foreach($tree as $key => $singlePost){
+			if (isset($singlePost['value']) && strlen($singlePost['value']>0)){
+				$returnArray[] = $singlePost;
+			}
+			if (isset($singlePost['children']))
+				$this->_getAnsweredQuestions( $singlePost['children'], $returnArray);
+		}
+	}
+
+	private function _getUnAnsweredQuestions($tree, &$returnArray)
+	{
+		foreach($tree as $key => $singlePost){
+			if (isset($singlePost['value']) && strlen($singlePost['value']==0) && !(isset($singlePost['ignore']) && $singlePost['ignore']==1)){
+				$returnArray[] = $singlePost;
+			}
+			if (isset($singlePost['children']))
+				$this->_getUnAnsweredQuestions( $singlePost['children'], $returnArray);
+		}
+	}
+
+	private function _getAnsweredQuestionsWithParent($tree, &$returnArray, $title)
+	{
+		foreach($tree as $key => $singlePost){
+			if (isset($singlePost['value']) && strlen($singlePost['value']>0)){
+				$singlePost['post_title'] = $title . ' > ' . $singlePost['post_title'];
+				$singlePost['post_title'] = substr($singlePost['post_title'],3);
+				$returnArray[] = $singlePost;
+			}
+			if (isset($singlePost['children'])){
+				$this->_getAnsweredQuestionsWithParent( $singlePost['children'], $returnArray, $title . ' > ' . $singlePost['post_title']);
+			}
+		}
+	}
+
 	private function _getCurrentPostUserData($postID, $questionnaireTree)
 	{
 		foreach($questionnaireTree as $postKey => $singleQuestion){
