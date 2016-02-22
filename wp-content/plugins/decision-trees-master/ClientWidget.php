@@ -33,8 +33,10 @@ class DT_ClientWidget extends WP_Widget {
 				array_shift( $previous_answers );
 				$start = get_post( $start );
 			}
+			echo $args['before_widget'];
 
 			?>
+			<h3><?php echo $instance['title'];?></h3>
 			<table class="table table-striped">
 			<tr>
 				<th><?php _e('Client name','cftp_dt');?></th>
@@ -50,7 +52,10 @@ class DT_ClientWidget extends WP_Widget {
 				<td><a href="javascript:void(0)" redirect-url="<?php echo ($start!=null) ? get_permalink( $start->ID ):''; ?>" class="btn btn-primary btn-xs sign-out-client-button"><?php _e('Sign out','cftp_dt');?></a></td>
 			</tr>
 			<?php endif ;?>
+			</table>
 			<?php 
+
+        	echo $args['after_widget'];
 		}
 	}
 
@@ -60,9 +65,14 @@ class DT_ClientWidget extends WP_Widget {
 	 * @param array $instance The widget options
 	 */
 	public function form( $instance ) {
+		$title = ! empty( $instance['title'] ) ? $instance['title'] : __( 'New title', 'text_domain' );
 		?>
-		Widget for showing currently selected client
-		<?php
+		<p>Widget for showing currently selected client</p>
+		<p>
+		<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title:' ); ?></label> 
+		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>">
+		</p>
+		<?php 
 	}
 
 	/**
@@ -72,6 +82,8 @@ class DT_ClientWidget extends WP_Widget {
 	 * @param array $old_instance The previous options
 	 */
 	public function update( $new_instance, $old_instance ) {
-		// processes widget options to be saved
+		$instance = $old_instance;
+		$instance['title'] = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+		return $instance;
 	}
 }

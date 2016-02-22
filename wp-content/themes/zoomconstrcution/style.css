@@ -437,10 +437,12 @@ big {
 
 html, body, #page, .site-inner {
 	height: 100%;
+	overflow: scroll;
 }
 
 body {
 	/* Fallback for when there is no custom background color defined. */
+	background: url('img/bg-image.jpg') top left;
 }
 
 hr {
@@ -452,7 +454,6 @@ hr {
 
 ul,
 ol {
-	margin: 0 0 1.75em 1.25em;
 	padding: 0;
 }
 
@@ -786,7 +787,7 @@ a:active {
 }
 
 .main-navigation a {
-	color: #1a1a1a;
+	color: white;
 	display: block;
 	line-height: 1.3125;
 	outline-offset: -1px;
@@ -1468,18 +1469,23 @@ blockquote:after,
  */
 
 .site {
-	background-color: #fff;
 	box-shadow: 0 0 5px #666;
 }
 
 .site-inner {
-	padding: 1em;
 	margin: 0 auto;
 	position: relative;
 }
 
 .site-content {
 	word-wrap: break-word;
+}
+.site-content #primary #main{
+	background-color: rgba(255, 255, 255, 0.6);
+    border: 2px solid #000;
+}
+#secondary{
+	background-color: rgba(255, 255, 255, 0.6);
 }
 
 /* Do not show the outline on the skip link target. */
@@ -1513,6 +1519,9 @@ blockquote:after,
 	-webkit-flex-wrap: wrap;
 	-ms-flex-wrap: wrap;
 	flex-wrap: wrap;
+}
+.site-header-main .site-title{
+	display: none;
 }
 
 .site-branding {
@@ -1563,7 +1572,7 @@ blockquote:after,
 
 .menu-toggle:hover,
 .menu-toggle:focus {
-	background-color: transparent;
+	background-color: white;
 	border-color: #007acc;
 	color: #007acc;
 }
@@ -1633,8 +1642,8 @@ blockquote:after,
 
 .post-thumbnail img {
 	display: block;
+	margin: auto;
 }
-
 .no-sidebar .post-thumbnail img {
 	margin: 0 auto;
 }
@@ -2357,7 +2366,6 @@ body.search-no-results .page-header {
 .entry-summary a img,
 .comment-content a img,
 .textwidget a img {
-	display: block;
 }
 
 /* Make sure embeds and iframes fit their containers. */
@@ -2602,7 +2610,14 @@ p > video {
 	margin-bottom: 0;
 }
 
+.table-striped > tbody > tr:nth-of-type(even){
+	background-color: white;
+}
 
+.favorite-post-list-container{
+}
+.dt_client_widget{
+}
 /**
  * 14.0 - Media Queries
  */
@@ -2638,12 +2653,12 @@ p > video {
 	.site-description {
 		display: block;
 	}
-
 	.menu-toggle {
 		font-size: 16px;
 		font-size: 1.0rem;
 		margin: 1.3125em 0;
 		padding: 0.8125em 0.875em 0.6875em;
+		background-color: white;
 	}
 
 	.site-header-menu {
@@ -2683,6 +2698,8 @@ p > video {
 
 	.site-main > article {
 		margin-bottom: 5.25em;
+		max-height: auto;
+		overflow: auto;
 	}
 
 	.entry-title {
@@ -3071,7 +3088,9 @@ p > video {
 		line-height: 2.6923076923;
 		padding: 0;
 	}
-
+	.site-content #primary #main {
+	    min-height: 649px;
+	}
 	.widget_rss .rssSummary:last-child {
 		margin-bottom: 1.615384615em;
 	}
@@ -3129,6 +3148,26 @@ p > video {
 
 	.content-bottom-widgets .widget-area:nth-child(2):nth-last-child(1):last-of-type {
 		margin-right: 0;
+	}
+	.site-main article{
+    	max-height: 650px;
+    	overflow: scroll;
+	}
+	.fotorama__stage,#primary article .post-thumbnail{
+		height: 350px!important;
+	}
+	#primary article .post-thumbnail img{
+		height: 100%;
+	}
+
+	.site-content #primary{
+	    /*margin-top: -50px;*/
+	}
+	.favorite-post-list-container{
+		max-height: 340px;
+		overflow: scroll;
+	}
+	.dt_client_widget{
 	}
 
 	.site-footer {

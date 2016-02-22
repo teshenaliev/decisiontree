@@ -6,7 +6,6 @@ $customFields = get_post_meta($post->ID);
 		<a href="<?php echo get_permalink( $start->ID ); ?>">restart</a>
 	</div>
 <?php endif; ?>
-
 <ol id="cftp-dt-answers">
 
 	<?php
@@ -48,7 +47,8 @@ $customFields = get_post_meta($post->ID);
 
     </div>
 	<?php endif;?>
-    <?php if (isset($customFields['required']) && $customFields['required'][0]=='1'):?>
+    <?php if (isset($customFields['required']) && $customFields['required'][0]=='1'):
+    ?>
 	<div class="cftp-dt-add-value">
 
 		<div class="input-group input-group-lg">
@@ -63,6 +63,13 @@ $customFields = get_post_meta($post->ID);
 				<a href="javascript:void(0)" class="btn btn-danger action-ignore"><?php _e('Ignore','cftp_dt')?></a>
 	      	</span>
 			<?php endif;?>
+
+	    </div>
+
+		<div class="input-group input-group-lg additional-note-group">
+
+			<span class="input-group-addon" id="basic-addon1">Notes</span>
+	      	<input type="text" class="form-control additional-note" value="<?php echo (isset($question_user_meta['additional_note'])) ? $question_user_meta['additional_note'] : '';?>">
 
 	    </div>
     </div>

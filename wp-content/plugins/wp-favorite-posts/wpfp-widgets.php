@@ -53,9 +53,9 @@ function wpfp_widget_init() {
         }
         $title = empty($options['uf_widget_title']) ? 'My Selections' : $options['uf_widget_title'];
         echo $before_widget;
-        echo $before_title
+        echo '<h3>'
              . $title
-             . $after_title;
+             . '</h3>';
         $favorite_post_ids = wpfp_get_users_favorites();
 
 		$limit = $options['uf_widget_limit'];

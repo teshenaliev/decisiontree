@@ -74,7 +74,8 @@ jQuery(function($){
 				'action': my_ajax_object.action,
 				'operation': 'save-value',
 				'current-post-id': $('article.decision_node').attr('id').replace('post-',''),
-				'value': $('.cftp-dt-add-value input[type=number]').val()
+				'value': $('.cftp-dt-add-value input[type=number]').val(),
+				'additional_note': $('.cftp-dt-add-value input.additional-note').val()
 			};
 			$.ajax({
 		        type: "post",

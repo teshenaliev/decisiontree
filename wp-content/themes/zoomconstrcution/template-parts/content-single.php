@@ -15,7 +15,11 @@
 
 	<?php twentysixteen_excerpt(); ?>
 
-	<?php twentysixteen_post_thumbnail(); ?>
+	<?php 
+		if (strpos($post->post_content,'[gallery') === false && has_post_thumbnail()){
+			twentysixteen_post_thumbnail();
+		}
+	 ?>
 
 	<div class="entry-content">
 		<?php

@@ -51,6 +51,7 @@ class ExportController{
 		$this->TakeOffSheet();
 		$this->InformationSheet();
 		$this->QuestionResponseSheet();
+		$this->MobilizationSheet();
 		$this->objPHPExcel->setActiveSheetIndex(0);
 
 
@@ -137,13 +138,16 @@ class ExportController{
 		$row = 1;
 		$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)
 	            ->setCellValue('A'. $row, 'ID')
-	            ->setCellValue('B'. $row, 'Title');
-		$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)->getStyle('A1:B1')->applyFromArray($this->headerStyle);
+	            ->setCellValue('B'. $row, 'Title')
+	            ->setCellValue('C'. $row, 'Status');
+		$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)->getStyle('A1:C1')->applyFromArray($this->headerStyle);
 		foreach($answeredQuestions as $key => $singleQuestion){
 			$row++;
+
 			$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)
 	            ->setCellValue('A'. $row, $singleQuestion['ID'])
-	            ->setCellValue('B'. $row, $singleQuestion['post_title']);
+	            ->setCellValue('B'. $row, $singleQuestion['post_title'])
+	            ->setCellValue('C'. $row, (isset($singleQuestion['skip']))?'Skipped':'Not answered');
 		}
 		$this->objPHPExcel->getActiveSheet()->setTitle('Question Response');
 		$this->activeSheetIndex++;
@@ -151,6 +155,26 @@ class ExportController{
 
 	private function MobilizationSheet()
 	{
-
+		$mobilizationSheet = new PHPExcel_Worksheet($this->objPHPExcel, 'Mobilization');
+		// Attach the “My Data” worksheet as the first worksheet in the PHPExcel object
+		$this->objPHPExcel->addSheet($mobilizationSheet, $this->activeSheetIndex);
+		$questionsWithNotes = $this->QuestionnaireController->getQuestionsWithNotes($this->currentUserQuestionnaireTree);
+		$row = 1;
+		$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)
+	            ->setCellValue('A'. $row, 'ID')
+	            ->setCellValue('B'. $row, 'Title')
+	            ->setCellValue('C'. $row, 'Value')
+	            ->setCellValue('D'. $row, 'Note');
+		$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)->getStyle('A1:D1')->applyFromArray($this->headerStyle);
+		foreach($questionsWithNotes as $key => $singleQuestion){
+			$row++;
+			$this->objPHPExcel->setActiveSheetIndex($this->activeSheetIndex)
+	            ->setCellValue('A'. $row, $singleQuestion['ID'])
+	            ->setCellValue('B'. $row, $singleQuestion['post_title'])
+	            ->setCellValue('C'. $row, $singleQuestion['value'])
+	            ->setCellValue('D'. $row, $singleQuestion['additional_note']);
+		}
+		$this->objPHPExcel->getActiveSheet()->setTitle('Mobilization');
+		$this->activeSheetIndex++;
 	}
 }

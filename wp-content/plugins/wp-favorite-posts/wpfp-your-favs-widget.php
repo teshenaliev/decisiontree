@@ -1,10 +1,10 @@
 <?php
-echo "<ul>";
 if ($favorite_post_ids) {
 	$c = 0;
 	$favorite_post_ids = array_reverse($favorite_post_ids);
     $total = 0;
     if (count($favorite_post_ids )>0){ ?>
+    <div class="favorite-post-list-container">
         <table class="favorite-post-list table table-condensed table-striped">
         <thead>
             <tr>
@@ -29,12 +29,10 @@ if ($favorite_post_ids) {
         <?php }?>
         </tbody>
         </table>
+        </div>
     <?php }
 }
 else{
-    echo "<li>";
     echo "No items in selection";
-    echo "</li>";
 }
-echo "</ul>";
 ?>

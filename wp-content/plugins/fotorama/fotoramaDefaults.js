@@ -1,0 +1,3 @@
+fotoramaDefaults = {
+    nav: 'thumbs',
+}

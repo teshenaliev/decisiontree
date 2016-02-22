@@ -103,10 +103,9 @@ function fotorama_scripts()
 		// Scripts
 		wp_register_script('fotorama.js', FOTORAMA_PLUGIN_URL . 'fotorama.js', array('jquery'));
 		wp_enqueue_script('fotorama.js');
-
-		if (file_exists(WP_PLUGIN_DIR . '/fotoramaDefaults.js')) {
+		if (file_exists(WP_PLUGIN_DIR . '/fotorama/fotoramaDefaults.js')) {
 			// Override defaults
-			wp_register_script('fotoramaDefaults.js', WP_PLUGIN_URL . '/fotoramaDefaults.js');
+			wp_register_script('fotoramaDefaults.js', WP_PLUGIN_URL . '/fotorama/fotoramaDefaults.js');
 			wp_enqueue_script('fotoramaDefaults.js');
 		}
 

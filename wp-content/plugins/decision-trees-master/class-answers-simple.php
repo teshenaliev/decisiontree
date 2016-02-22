@@ -95,36 +95,81 @@ class CFTP_DT_Answers_Simple {
 		$questionUserMeta = $answer->get_user_meta();
 		if (isset($questionMeta['selectable'][0]) && $questionMeta['selectable'][0]==1){
 			if (isset($questionUserMeta['selected']) && $questionUserMeta['selected']=='1'){
-				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
-						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
-						%2$s</a>',
+		
+				if (has_post_thumbnail($answer->get_page_id())){
+					//echo ;
+				}
+				echo sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+						%2$s
+						<div><span class="glyphicon glyphicon-ok" aria-hidden="true"></span> 
+						%3$s</div></a>',
 					get_permalink( $answer->get_post()->ID ),
+					get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' ),
 					$answer->get_answer_value()
 				);
 			}
 			else{?>
 				<span class="cftp_dt_answer_link btn btn-warning btn-large">
-	                <input id="decision-tree-<?php echo $answer->post->ID;?>" type="checkbox" <?php echo (isset($questionUserMeta['selected']) && $questionUserMeta['selected']==1)?'checked':'';?>>
+					<?php echo get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' );?>
+	                <div><input id="decision-tree-<?php echo $answer->post->ID;?>" type="checkbox" <?php echo (isset($questionUserMeta['selected']) && $questionUserMeta['selected']==1)?'checked':'';?>>
 	                <label for="decision-tree-<?php echo $answer->post->ID;?>">
 	                    <?php echo $answer->get_answer_value()?></a>
 	                </label>
+	                </div>
 	            </span>
 			<?php }
 		}
 		else{
 			if (isset($questionMeta['sequence'][0]) && $questionMeta['sequence'][0]==1){
-				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
-					<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> 
-					%2$s</a>',
-				get_permalink( $answer->get_post()->ID ),
-				$answer->get_answer_value()
-				);
+				if (isset($questionUserMeta['ignore']) && $questionUserMeta['ignore']==1){
+					return sprintf( '<span class="cftp_dt_answer_link btn btn-warning btn-large">
+						<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> 
+						%2$s</a>',
+						$answer->get_answer_value()
+					);
+				}
+				else{
+					return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+						<span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span> 
+						%2$s</a>',
+					get_permalink( $answer->get_post()->ID ),
+					$answer->get_answer_value()
+					);
+				}
 			}
 			else{
-				return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">%2$s</a>',
-				get_permalink( $answer->get_post()->ID ),
-				$answer->get_answer_value()
-				);
+				if (isset($questionUserMeta['value']) && $questionUserMeta['value']>0){
+					return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+						%2$s <div> <span class="glyphicon glyphicon glyphicon-plus" aria-hidden="true"></span> %3$s : %4$s</div></a>',
+						get_permalink( $answer->get_post()->ID ),
+						get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' ),
+						$answer->get_answer_value(),
+						$questionUserMeta['value']
+					);
+				}
+				if (isset($questionUserMeta['ignore']) && $questionUserMeta['ignore']==1){
+					return sprintf( '<span class="cftp_dt_answer_link btn btn-warning btn-large">
+						%1$s <div>
+						<span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span> %2$s</div></a>',
+						get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' ),
+						$answer->get_answer_value()
+					);
+				}
+				else if (isset($questionUserMeta['skip']) && $questionUserMeta['skip']==1){
+					return sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">
+						%2$s <div>
+						<span class="glyphicon glyphicon glyphicon-step-forward" aria-hidden="true"></span>  %3$s</div></a>',
+						get_permalink( $answer->get_post()->ID ),
+						get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' ),
+						$answer->get_answer_value()
+					);
+				}
+				else
+					echo sprintf( '<a class="cftp_dt_answer_link btn btn-warning btn-large" href="%1$s">%2$s <div>%3$s</div></a>',
+					get_permalink( $answer->get_post()->ID ),
+					get_the_post_thumbnail( $answer->get_page_id(), 'thumbnail' ),
+					$answer->get_answer_value()
+					);
 			}
 		}
 	}

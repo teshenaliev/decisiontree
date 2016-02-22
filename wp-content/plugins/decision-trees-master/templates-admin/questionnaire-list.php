@@ -22,6 +22,8 @@ function printUserQuestionnaireTree($tempUserData, $level)
 			</td>
 			<td><?php echo $singleQuestionnaire['visited']==1 ?'yes' : 'no';?></td>
 			<td><?php echo $singleQuestionnaire['value'];?></td>
+			<td><?php echo $singleQuestionnaire['price'];?></td>
+			<td><?php echo $singleQuestionnaire['price'] * $singleQuestionnaire['value'];?></td>
 			<td><?php if (isset($singleQuestionnaire['skip']) && $singleQuestionnaire['skip']==1):?>
 					<?php _e('Skipped','cftp_dt');?>
 				<?php elseif(isset($singleQuestionnaire['ignore']) && $singleQuestionnaire['ignore']==1):?>
@@ -35,7 +37,8 @@ function printUserQuestionnaireTree($tempUserData, $level)
 			printUserQuestionnaireTree($singleQuestionnaire['children'], $level+1);
 		}
 		endforeach;
-}?>
+}
+?>
 <div class="wrap">
 	<h2><?php _e( 'Questionnaire list', 'cftp_dt' ); ?> <a href="http://<?php  echo $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] .'&export=true';?>" class="page-title-action"><?php _e( 'Export report','cftp_dt' ); ?></a></h2>
 
@@ -48,6 +51,8 @@ function printUserQuestionnaireTree($tempUserData, $level)
 			<th class="row-title"><?php _e('Type','cftp_dt');?></th>
 			<th class="row-title"><?php _e('Visited','cftp_dt');?></th>
 			<th class="row-title"><?php _e('Value','cftp_dt');?></th>
+			<th class="row-title"><?php _e('Price','cftp_dt');?></th>
+			<th class="row-title"><?php _e('Total','cftp_dt');?></th>
 			<th class="row-title"><?php _e('Status','cftp_dt');?></th>
 			<th class="row-title"><?php _e('Action','cftp_dt');?></th>
 		</tr>

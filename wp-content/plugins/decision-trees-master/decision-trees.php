@@ -170,7 +170,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 		
 		if (current_user_can('editor')){
-			add_filter( 'admin_body_class', array($this,'add_admin_body_class') );	
+			add_filter( 'admin_body_class', array($this,'add_admin_body_class') );
 		}
 		wp_enqueue_style(
 			'cftp-dt-admin',
@@ -294,8 +294,11 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			),
 			'query_var'          => 'help', // @TODO: is this the best qv name?
 			'delete_with_user'   => false,
-			'supports'           => array( 'title', 'editor', 'page-attributes' ),
+			'supports'           => array( 'title', 'editor', 'page-attributes', 'thumbnail' ),
 		);
+		if (current_user_can('editor')){
+			add_action('get_header', array( $this, 'remove_admin_login_header') );
+		}
 		$args = apply_filters( 'cftp_dt_cpt_args', $args );
 		$cpt = register_post_type( $this->post_type, $args );
 	}
@@ -350,6 +353,10 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		};
 		$vars['tree'] = $tree;
 		$this->render_admin( 'visualise-tree.php', $vars );
+	}
+
+	function remove_admin_login_header() {
+		remove_action('wp_head', '_admin_bar_bump_cb');
 	}
 
 	function admin_page_quesionnaire_list() {
@@ -615,6 +622,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	function filter_the_content( $content ) {
 
 		global $post;
+		$vars = array();
 
 		if (is_user_logged_in()){
 			$currenUser = wp_get_current_user();
@@ -622,6 +630,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 				if (isset($_GET['select_user']) && $_GET['select_user'] == 'true' && is_numeric($_GET['user_id'])){
 					$_SESSION['client_id'] = $_GET['user_id'];
 					$this->QuestionnaireController->initializeQuestinonnaireTree($_SESSION['client_id']);
+					$uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
+					$url = 'http://' . $_SERVER['HTTP_HOST'] . $uri_parts[0];
 				}
 				if (isset($_GET['sign_out_client']) && $_GET['sign_out_client']=='true'){
 					unset($_SESSION['client_id']);
@@ -656,7 +666,6 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 
 		remove_filter( 'the_title', array( $this, 'filter_the_title' ), 0, 2 );
 
-		$vars = array();
 		$vars[ 'start' ] = $start;
 		$vars[ 'previous_answers' ] = $previous_answers;
 		$vars[ 'title' ] = get_the_title( $post->ID );
@@ -678,14 +687,13 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 	}
 
 	function filter_the_title( $title, $post ) {
-		/*if (!is_user_logged_in() || (!isset($_SESSION['client_id']) || !$_SESSION['client_id']))
-			return;*/
 		if ( is_admin() )
 			return $title;
 
 		$post = get_post( $post );
-		if ( 'decision_tree' != $post->post_type )
+		if ( 'decision_tree' != $post->post_type ){
 			return $title;
+		}
 
 		if ( ! $post->post_parent )
 			return $title;
@@ -896,6 +904,9 @@ class CFTP_DT_Answer {
 
 	function get_page_title() {
 		return get_the_title( $this->post->ID );
+	}
+	function get_page_id() {
+		return  $this->post->ID ;
 	}
 
 	function get_answer_value() {

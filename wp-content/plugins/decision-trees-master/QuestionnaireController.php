@@ -27,7 +27,14 @@ class QuestionnaireController
 	public function saveQuestionValue()
 	{
 		$bbb = $_SESSION['questionnaire_tree'];
-		$result = $this->_changeQuestionnaireValue($_POST['current-post-id'], array('value'=>$_POST['value']), $bbb);
+		$values = array();
+		if (is_numeric($_POST['value']) && $_POST['value'] > 0){
+			$values['value'] = $_POST['value'];
+		}
+		if (strlen($_POST['additional_note']) > 0){
+			$values['additional_note'] = $_POST['additional_note'];
+		}
+		$result = $this->_changeQuestionnaireValue($_POST['current-post-id'], $values, $bbb);
 		$_SESSION['questionnaire_tree'] = $bbb;
 		update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
 		;
@@ -103,13 +110,19 @@ class QuestionnaireController
 	public function getUnAnsweredQuestions($questionnaireTree)
 	{
 		$returnValue = array();
-		$this->_getUnAnsweredQuestions($questionnaireTree, $returnValue);
+		$this->_getUnAnsweredQuestions($questionnaireTree, $returnValue, '');
 		return $returnValue;
 	}
 	public function getAnsweredQuestionsWithParent($questionnaireTree)
 	{
 		$returnValue = array();
 		$this->_getAnsweredQuestionsWithParent($questionnaireTree, $returnValue, '');
+		return $returnValue;
+	}
+	public function getQuestionsWithNotes($questionnaireTree)
+	{
+		$returnValue = array();
+		$this->_getQuestionsWithNotes($questionnaireTree, $returnValue);
 		return $returnValue;
 	}
 
@@ -245,14 +258,27 @@ class QuestionnaireController
 		}
 	}
 
-	private function _getUnAnsweredQuestions($tree, &$returnArray)
+	private function _getUnAnsweredQuestions($tree, &$returnArray, $title)
 	{
 		foreach($tree as $key => $singlePost){
-			if (isset($singlePost['value']) && strlen($singlePost['value']==0) && !(isset($singlePost['ignore']) && $singlePost['ignore']==1)){
+			if (isset($singlePost['value']) && strlen($singlePost['value']==0) && !(isset($singlePost['ignore']) && $singlePost['ignore']==1) && !isset($singlePost['children'])){
+				$singlePost['post_title'] = $title . ' > ' . $singlePost['post_title'];
+				$singlePost['post_title'] = substr($singlePost['post_title'],3);
 				$returnArray[] = $singlePost;
 			}
 			if (isset($singlePost['children']))
-				$this->_getUnAnsweredQuestions( $singlePost['children'], $returnArray);
+				$this->_getUnAnsweredQuestions( $singlePost['children'], $returnArray, $title . ' > ' . $singlePost['post_title']);
+		}
+	}
+
+	private function _getQuestionsWithNotes($tree, &$returnArray)
+	{
+		foreach($tree as $key => $singlePost){
+			if (isset($singlePost['additional_note']) && strlen($singlePost['additional_note'])>0 && !(isset($singlePost['ignore']) && $singlePost['ignore']==1)){
+				$returnArray[] = $singlePost;
+			}
+			if (isset($singlePost['children']))
+				$this->_getQuestionsWithNotes( $singlePost['children'], $returnArray);
 		}
 	}
 
@@ -278,8 +304,10 @@ class QuestionnaireController
 			}
 			if (isset($singleQuestion['children'])){
 				$returnValue = $this->_getCurrentPostUserData($postID, $questionnaireTree[$postKey]['children']);
-				if ($returnValue != false)
+				if ($returnValue != false){
+
 					return $returnValue;
+				}
 			}
 		}
 		return false;
