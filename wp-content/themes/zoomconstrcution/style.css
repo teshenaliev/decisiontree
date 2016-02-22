@@ -1494,7 +1494,6 @@ blockquote:after,
 }
 
 .site-main {
-	margin-bottom: 3.5em;
 }
 
 .site-main > :last-child {
@@ -2642,7 +2641,9 @@ p > video {
  */
 
 @media screen and (min-width: 44.375em) {
-
+	.row{
+		margin:0;
+	}
 	
 	.site-title {
 		font-size: 28px;
@@ -3159,7 +3160,9 @@ p > video {
 	#primary article .post-thumbnail img{
 		height: 100%;
 	}
-
+	.site-header, .site-content{
+		width: 980px;
+	}
 	.site-content #primary{
 	    /*margin-top: -50px;*/
 	}

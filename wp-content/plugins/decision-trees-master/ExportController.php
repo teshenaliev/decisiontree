@@ -56,7 +56,7 @@ class ExportController{
 
 
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="01simple.xlsx"');
+		header('Content-Disposition: attachment;filename="'.$this->currentUser->data->meta_data['first_name'][0].'-'.$this->currentUser->data->meta_data['last_name'][0].'-report.xlsx"');
 		header('Cache-Control: max-age=0');
 		header('Cache-Control: max-age=1');
 
