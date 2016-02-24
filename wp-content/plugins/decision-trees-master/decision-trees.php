@@ -215,7 +215,7 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			$title = trim( $answer['page_title'] );
 			$page  = get_page_by_title( $title, OBJECT, $this->post_type );
 
-			if ( !$page ) {
+			if ( true ) {
 				$this->no_recursion = true;
 				$page_id = wp_insert_post( array(
 					'post_title'  => $title,
