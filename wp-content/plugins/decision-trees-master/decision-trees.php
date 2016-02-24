@@ -387,7 +387,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 		else{
 			$currentUser = $this->get_user_with_meta($_GET['user_id']);
 			$vars['current_user'] = $currentUser;
-			$vars['questionnaireUserMeta'] = unserialize($currentUser->meta_data['questionnaire_tree'][0]);
+			$questionnaire_user_meta = unserialize($currentUser->meta_data['questionnaire_tree'][0]);
+			$vars['questionnaireUserMeta'] = $this->QuestionnaireController->removeNotActiveQuestions($questionnaire_user_meta);
 			$this->render_admin( 'questionnaire-list.php', $vars );
 		}
 

@@ -1482,7 +1482,8 @@ blockquote:after,
 }
 .site-content #primary #main{
 	background-color: rgba(255, 255, 255, 0.6);
-    border: 2px solid #000;
+    border: 1px solid #000;
+    padding: 15px;
 }
 #secondary{
 	background-color: rgba(255, 255, 255, 0.6);

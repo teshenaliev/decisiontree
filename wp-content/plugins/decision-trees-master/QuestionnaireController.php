@@ -125,6 +125,14 @@ class QuestionnaireController
 		$this->_getQuestionsWithNotes($questionnaireTree, $returnValue);
 		return $returnValue;
 	}
+	
+	public function removeNotActiveQuestions($questionnaireTree)
+	{
+		$returnValue = $questionnaireTree;
+		$this->_removeNotActiveQuestions($returnValue);
+		return $returnValue;
+		//return $returnValue;
+	}
 
 	private function populateQuestinonnaireTree($clientID)
 	{
@@ -255,6 +263,17 @@ class QuestionnaireController
 			}
 			if (isset($singlePost['children']))
 				$this->_getAnsweredQuestions( $singlePost['children'], $returnArray);
+		}
+	}
+	private function _removeNotActiveQuestions(&$tree)
+	{
+		foreach($tree as $key => $singlePost){
+			if ($singlePost['selectable'] == '1' && $singlePost['selected'] != '1'){
+				unset($tree[$key]);
+			}
+			else if (isset($tree[$key]['children'])){
+				$this->_removeNotActiveQuestions( $tree[$key]['children']);
+			}
 		}
 	}
 

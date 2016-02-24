@@ -13,7 +13,8 @@
 		<table class="widefat fixed striped pages">
 		<thead>
 			<tr>
-				<th colspan="2" class="row-title"><?php _e('ID','cftp_dt');?></th>
+				<th><?php _e('Title','cftp_dt');?></th>
+				<th><?php echo $current_question_user_meta['post_title'];?></th>
 			</tr>
 		</thead>
 		<tbody>

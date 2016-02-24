@@ -15,7 +15,7 @@ class ExportController{
 		$this->QuestionnaireController = $DecisionTree->QuestionnaireController;
 		$this->currentUser = $this->DecisionTree->get_user_with_meta($_GET['user_id']);
 		if (isset($this->currentUser->meta_data['questionnaire_tree'][0])){
-			$this->currentUserQuestionnaireTree = unserialize($this->currentUser->meta_data['questionnaire_tree'][0]);
+			$this->currentUserQuestionnaireTree = $this->QuestionnaireController->removeNotActiveQuestions(unserialize($this->currentUser->meta_data['questionnaire_tree'][0]));
 		}
 		$this->activeSheetIndex = 0;
 		$this->headerStyle = array(
