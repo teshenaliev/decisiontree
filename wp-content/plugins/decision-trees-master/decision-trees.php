@@ -588,6 +588,8 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			array( 'jquery'),
 			$this->plugin_ver( 'js/script.js' )
 		);
+		wp_enqueue_script( 'jquery-ui-dialog', array('jquery') );
+		wp_enqueue_script( 'bootbox', $this->plugin_url( 'js/bootbox.js' ), array( 'jquery'));
 
 		// in JavaScript, object properties are accessed as ajax_object.ajax_url, ajax_object.we_value
 		wp_localize_script( 'cftp-dt-frontend-js', 'my_ajax_object',
@@ -634,10 +636,15 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 					$uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);
 					$url = 'http://' . $_SERVER['HTTP_HOST'] . $uri_parts[0];
 				}
+				if (isset($_GET['questionnaire_view_mode']) && $_GET['questionnaire_view_mode']!='') {
+					update_user_meta ($_SESSION['client_id'], 'questionnaire_view_mode', $_GET['questionnaire_view_mode'] );
+					$_SESSION['questionnaire_view_mode'] = $_GET['questionnaire_view_mode'];
+				}
 				if (isset($_GET['sign_out_client']) && $_GET['sign_out_client']=='true'){
 					unset($_SESSION['client_id']);
 					unset($_SESSION['client_idquestionnaire_tree']);
 					unset($_SESSION['questionnaire_tree']);
+					unset($_SESSION['questionnaire_view_mode']);
 				}
 				if (isset($_SESSION['client_id']) && isset($_SESSION['client_id'])){
 					$this->QuestionnaireController->changeQuestionnaireValue($post->ID,array('visited'=>true));
@@ -649,7 +656,6 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 				show_admin_bar( false );
 			}
 		}
-
 		if ( $this->post_type != $post->post_type )
 			return $content;
 
@@ -692,16 +698,12 @@ class CFTP_Decision_Trees extends CFTP_DT_Plugin {
 			return $title;
 
 		$post = get_post( $post );
-		if ( 'decision_tree' != $post->post_type ){
+		if ( $post->post_type == 'decision_node'  ){
 			return $title;
 		}
-
-		if ( ! $post->post_parent )
+		else{
 			return $title;
-
-		$ancestors = get_post_ancestors( $post->ID );
-		$oldest = get_post( array_pop( $ancestors ) );
-		return $oldest->post_title;
+		}
 	}
 
 	/**

@@ -2,12 +2,18 @@
 $customFields = get_post_meta($post->ID);
 ?>
 <?php if ( $start ) : ?>
-	<div class="cftp-dt-restart">
-		<a href="<?php echo get_permalink( $start->ID ); ?>">restart</a>
-	</div>
+	<div class="row">
+		<div class="view-mode-container col-md-12">
+	        <strong>View Mode</strong>
+	        <div class="btn-group">
+	            <a href="<?php echo esc_url( get_permalink() ).(strpos(get_permalink(), '?')===false ? '?' : '&' ); ?>questionnaire_view_mode=list_view" id="list" class="btn btn-warning <?php echo ($_SESSION['questionnaire_view_mode']=='list_view')?' active':''?> btn-sm"><span class="glyphicon glyphicon-th-list"></span> List</a>
+	            <a href="<?php echo esc_url( get_permalink() ).(strpos(get_permalink(), '?')===false ? '?' : '&' );; ?>&questionnaire_view_mode=tree_view" id="grid" class="btn btn-warning <?php echo ($_SESSION['questionnaire_view_mode']=='tree_view')?' active':''?> btn-sm"><span class="glyphicon glyphicon-th"></span> Tree</a>
+	        </div>
+	    </div>
+    </div>
 <?php endif; ?>
 <ol id="cftp-dt-answers">
-
+	<li class="cftp_dt_prev_answer"><a href="<?php echo get_permalink($start->ID)?>"><h3 class="cftp-dt-node-title">Home</h3></a> &#10097;</li>
 	<?php
 		foreach ( $previous_answers as $previous_answer ) :
 			$previous_answer = get_post( $previous_answer );

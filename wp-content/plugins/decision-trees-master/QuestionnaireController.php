@@ -84,11 +84,20 @@ class QuestionnaireController
 		$currentUser = $this->DecisionTree->get_user_with_meta($clientID);
 		if (isset($currentUser->meta_data['questionnaire_tree'][0]) && $forcePopulate == false){
 			$_SESSION['questionnaire_tree'] = unserialize($currentUser->meta_data['questionnaire_tree'][0]);
+			
 		}
 		else{
 			$_SESSION['questionnaire_tree'] = $this->populateQuestinonnaireTree($clientID);
 			update_user_meta($clientID,'questionnaire_tree',$_SESSION['questionnaire_tree']);
-		} 
+		}
+		if (isset($currentUser->meta_data['questionnaire_view_mode'][0]) && $currentUser->meta_data['questionnaire_view_mode'][0] != ''){
+			$_SESSION['questionnaire_view_mode'] = $currentUser->meta_data['questionnaire_view_mode'][0];
+		}
+		else{
+			update_user_meta ($clientID, 'questionnaire_view_mode', 'tree_view' );
+			$currentUser = $this->DecisionTree->get_user_with_meta($clientID);
+			$_SESSION['questionnaire_view_mode'] = $currentUser->meta_data['questionnaire_view_mode'][0];
+		}
 	}
 
 	public function getNextSequenceUrl()
@@ -223,35 +232,29 @@ class QuestionnaireController
 		$parentLevel = false;
 		$nextParentSiblingUrl = false;
 		foreach($questionnaireTree as $postKey => $singleQuestion){
+			if ($currentLevel==true && (!isset($singleQuestion['ignore']) || (isset($singleQuestion['ignore']) &&  $singleQuestion['ignore']!='1'))){
+				return get_permalink($singleQuestion['ID']);
+			}
+			else if ($parentLevel==true && (isset($singleQuestion['selectable']) && $singleQuestion['selected']=='1')){
+				return get_permalink($singleQuestion['ID']);
+			}
 			if ($singleQuestion['ID']==$postID){
 				$currentLevel = true;
 			}
-			else if ($currentLevel==true){
-				return $singleQuestion['guid'];
-			}
-		}
-		if ($currentLevel == false){
-			foreach($questionnaireTree as $postKey => $singleQuestion){
-				if (isset($singleQuestion['children'])){
-					$returnedValue = $this->getNextSiblingUrl($postID, $questionnaireTree[$postKey]['children']);
-					if ($parentLevel == true){
-						return $singleQuestion['guid'];
-					}
-					if ($returnedValue === -2){
-						$parentLevel = true;
-					}
-					else if ($returnedValue != false){
-						return $returnedValue;
-					}
+			if (isset($singleQuestion['children']) && $currentLevel == false  && $parentLevel == false){
+				$returnedValue = $this->getNextSiblingUrl($postID, $questionnaireTree[$postKey]['children']);
+				if ($returnedValue === -2){
+					$parentLevel = true;
+				}
+				if ($returnedValue != false && $returnedValue !== -2 ){
+					return $returnedValue;
 				}
 			}
-			if ($parentLevel == true){
-				return -2;
-			}
 		}
-		else if($currentLevel == true){
+		if ($currentLevel==true || $parentLevel==true){
 			return -2;
 		}
+
 		return false;
 	}
 

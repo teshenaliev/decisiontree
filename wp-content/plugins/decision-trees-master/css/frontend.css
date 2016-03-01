@@ -9,6 +9,10 @@
 .cftp_dt_answer_link.btn{
 	width:98%;
 }
+.cftp_dt_answer_link.btn div{
+	overflow: hidden;
+    text-overflow: ellipsis;
+}
 
 #cftp-dt-answers{
 	display: block;
@@ -25,4 +29,23 @@ span.cftp_dt_answer_link{
 }
 .additional-note-group{
 	margin-top:20px;
+}
+.view-mode-container{
+	text-align: right;
+}
+.view-mode-container .btn.active{
+	font-weight: bold;
+}
+.list-view-action-column .btn{
+	margin:0;
+	margin-left:5px;
+}
+.list-view-action-column .btn:first-child{
+	margin-left:0px;
+}
+.modal-dialog{
+	margin-top: 5%!important;
+}
+table.cftp-dt-answers label{
+	font-size:12px;
 }

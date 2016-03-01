@@ -324,6 +324,7 @@ class NM_WPRegistration extends NM_Framwork_V1_wpregistration{
 			foreach ( $submitted_data as $key => $val ) {
 				update_user_meta ( $userid, $key, $val );
 			}
+			update_user_meta ( $userid, 'questionnaire_view_mode', 'tree_view' );
 			
 			
 			$site_title = get_bloginfo();

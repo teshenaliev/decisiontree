@@ -6,7 +6,7 @@ jQuery(function($){
 	});
 
 	$('.sign-out-client-button').click(function(){
-			window.location = $(this).attr('redirect-url') + '?sign_out_client=true';
+			window.location = $(this).attr('redirect-url') + ($(this).attr('redirect-url').indexOf('?')>=0?'&':'?') + 'sign_out_client=true';
 	});
 	$('.selectable-continue-button').click(function(){
 		var data = {
@@ -24,7 +24,7 @@ jQuery(function($){
 			}
 		});
 		if (categorySelected==false){
-			alert('Please, select at least one category');
+			bootbox.alert('Please, select at least one category');
 		}
 		else{
 			$.ajax({
@@ -56,7 +56,7 @@ jQuery(function($){
 	        	data = jQuery.parseJSON( data );
             	if (data.result == 'success'){
             		if (data.value == -2){
-            			alert('Questionnaire Complete');
+            			bootbox.alert('Questionnaire Complete');
             		}
             		else{
             			window.location = data.value;
@@ -65,9 +65,10 @@ jQuery(function($){
 	        }
 	    });
 	});
+	//tree view add action
 	$('.cftp-dt-add-value a.action-add').click(function(){
 		if ($('.cftp-dt-add-value input[type=number]').val() == ''){
-			alert('Please, insert value');
+			bootbox.alert('Please, insert value');
 		}
 		else{
 			var data = {
@@ -86,15 +87,99 @@ jQuery(function($){
 		        	data = jQuery.parseJSON( data );
 	            	if (data.result == 'success'){
 	            		if (data.value == -2){
-	            			alert('Questionnaire Complete');
+	            			bootbox.alert('Questionnaire Complete');
+	            		}
+	            		else if (data.value !='false'){
+	            			window.location = data.value;
 	            		}
 	            		else{
-	            			window.location = data.value;
+	            			bootbox.alert('Value saved');
 	            		}
 	            	}
 		        }
 		    });
 		}
+	});
+	//list view add action
+	$('.list-view-action-column a.action-add').click(function(){
+		var parentTr = $(this).parents('tr');
+		if (parentTr.find('.question_value').val()==''){
+			bootbox.alert("Please insert value", function() {
+			});
+		}
+		else{
+			var data = {
+				'action': my_ajax_object.action,
+				'operation': 'save-value',
+				'current-post-id': parentTr.find('.question_id').val(),
+				'value': parentTr.find('.question_value').val(),
+				'additional_note': parentTr.find('.question_additional_note').val()
+			};
+			$.ajax({
+		        type: "post",
+		        datatype: "json",
+		        url: my_ajax_object.ajax_url,
+		        data: data,
+		        success: function(data){
+		        	data = jQuery.parseJSON( data );
+		        	if (data.result == 'success'){
+						bootbox.alert("Value saved", function() {
+							
+						});
+		        	}
+		        	else{
+						bootbox.alert("Value not saved", function() {
+						});
+		        	}
+	            	window.setTimeout(function(){
+					    bootbox.hideAll();
+					}, 2000);
+		        }
+		    });
+		}
+	});
+	//list view ignore action
+	$('.list-view-action-column a.action-ignore').click(function(){
+	    bootbox.confirm("Ignoring this question will remove this question. Do you really want to continue?", function(result) {
+		  	if (result == true){
+		  		var parentTr = $(this).parents('tr');
+				var data = {
+					'action': my_ajax_object.action,
+					'operation': 'ignore-value',
+					'current-post-id': parentTr.find('.question_id').val()
+				};
+				$.ajax({
+			        type: "post",
+			        datatype: "json",
+			        url: my_ajax_object.ajax_url,
+			        data: data,
+			        success: function(data){
+			        	data = jQuery.parseJSON( data );
+		            	if (data.result == 'success'){
+		            		if (data.value == -2){
+		            			bootbox.alert('Questionnaire Complete');
+		            		}
+		            		else{
+				        		$( "#dialog" ).dialog({
+					              	modal: true,
+					             	title: 'Answer ignored',
+					             	width: 400,
+					            	buttons : {
+					                Ok: function() {
+					                	parentTr.fadeOut('slow',
+					                		function(){
+					                			parentTr.remove();
+					                		});
+					                    $(this).dialog("close"); //closing on Ok click
+					                }
+					            }
+					        	});
+		            		}
+		            	}
+			        }
+			    });
+		  	}
+		});
 	});
 	$('.cftp-dt-add-value a.action-skip').click(function(){
 		var data = {
@@ -111,7 +196,7 @@ jQuery(function($){
 		        	data = jQuery.parseJSON( data );
 	            	if (data.result == 'success'){
 	            		if (data.value == -2){
-	            			alert('Questionnaire Complete');
+	            			bootbox.alert('Questionnaire Complete');
 	            		}
 	            		else{
 	            			window.location = data.value;
@@ -121,27 +206,31 @@ jQuery(function($){
 		    });
 	});
 	$('.cftp-dt-add-value a.action-ignore').click(function(){
-		var data = {
-				'action': my_ajax_object.action,
-				'operation': 'ignore-value',
-				'current-post-id': $('article.decision_node').attr('id').replace('post-','')
-			};
-			$.ajax({
-		        type: "post",
-		        datatype: "json",
-		        url: my_ajax_object.ajax_url,
-		        data: data,
-		        success: function(data){
-		        	data = jQuery.parseJSON( data );
-	            	if (data.result == 'success'){
-	            		if (data.value == -2){
-	            			alert('Questionnaire Complete');
-	            		}
-	            		else{
-	            			window.location = data.value;
-	            		}
-	            	}
-		        }
-		    });
+		bootbox.confirm("Ignoring this question will remove this question. Do you really want to continue?", function(result) {
+			if (result == true){
+				var data = {
+					'action': my_ajax_object.action,
+					'operation': 'ignore-value',
+					'current-post-id': $('article.decision_node').attr('id').replace('post-','')
+				};
+				$.ajax({
+			        type: "post",
+			        datatype: "json",
+			        url: my_ajax_object.ajax_url,
+			        data: data,
+			        success: function(data){
+			        	data = jQuery.parseJSON( data );
+		            	if (data.result == 'success'){
+		            		if (data.value == -2){
+		            			bootbox.alert('Questionnaire Complete');
+		            		}
+		            		else{
+		            			window.location = data.value;
+		            		}
+		            	}
+			        }
+			    });
+			}
+		});
 	});
 })
