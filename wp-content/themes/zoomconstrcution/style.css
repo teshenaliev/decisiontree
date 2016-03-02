@@ -1561,7 +1561,7 @@ blockquote:after,
 }
 
 .menu-toggle {
-	background-color: transparent;
+	background-color: white;
 	border: 1px solid #d1d1d1;
 	color: #1a1a1a;
 	font-size: 13px;

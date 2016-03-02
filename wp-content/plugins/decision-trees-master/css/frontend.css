@@ -20,10 +20,6 @@
 #cftp-dt-answers .cftp-dt-node-title{
 	display: inline;
 }
-.create-user-container,.select-user-container{
-	width: 49%;
-	float:left;
-}
 span.cftp_dt_answer_link{
 	margin-left:10px;
 }
@@ -48,4 +44,11 @@ span.cftp_dt_answer_link{
 }
 table.cftp-dt-answers label{
 	font-size:12px;
+}
+@media screen and (min-width: 44.375em) {
+	.create-user-container,.select-user-container{
+		width: 49%;
+		float:left;
+	}
+	
 }
