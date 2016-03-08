@@ -401,17 +401,26 @@ function remove_width_attribute( $html ) {
    $html = preg_replace( '/(width|height)="\d*"\s/', "", $html );
    return $html;
 }
-/*function wrap_images( $content ) {
 
-   // A regular expression of what to look for.
-   $pattern = '/(<img([^>]*)>)/i';
-   // What to replace it with. $1 refers to the content in the first 'capture group', in parentheses above
-   $replacement = "<div id='slider'>\n\t$1 \n</div>";
+function my_login_logo() { ?>
+    <style type="text/css">
+        .login h1 a {
+            background: url(<?php echo get_stylesheet_directory_uri(); ?>/img/site-login-logo.png) no-repeat center center;
+            background-size:cover;
+            height: 100px;
+            width: auto;
+            padding-bottom: 30px;
+        }
+    </style>
+<?php }
+add_action( 'login_enqueue_scripts', 'my_login_logo' );
 
-   // run preg_replace() on the $content
-   $content = preg_replace( $pattern, $replacement, $content );
-
-   // return the processed content
+function my_login_logo_url() {
+    return home_url();
 }
+add_filter( 'login_headerurl', 'my_login_logo_url' );
 
-add_filter( 'the_content', 'wrap_images' );*/
+function my_login_logo_url_title() {
+    return 'Zoom Contracting';
+}
+add_filter( 'login_headertitle', 'my_login_logo_url_title' );

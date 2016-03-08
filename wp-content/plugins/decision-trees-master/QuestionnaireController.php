@@ -22,6 +22,7 @@ class QuestionnaireController
 		}
 		$_SESSION['questionnaire_tree'] = $bbb;
 		update_user_meta($_SESSION['client_id'],'questionnaire_tree',$_SESSION['questionnaire_tree']);
+		
 		echo json_encode(array('result'=>'success','value'=>$this->getNextPageUrl($_SESSION['questionnaire_tree'], 'selectable')));
 	}
 	public function saveQuestionValue()
@@ -32,7 +33,7 @@ class QuestionnaireController
 			$values['value'] = $_POST['value'];
 		}
 		if (strlen($_POST['additional_note']) > 0){
-			$values['additional_note'] = $_POST['additional_note'];
+			$values['additional_note'] = str_replace("\\", '', $_POST['additional_note']);
 		}
 		$result = $this->_changeQuestionnaireValue($_POST['current-post-id'], $values, $bbb);
 		$_SESSION['questionnaire_tree'] = $bbb;
