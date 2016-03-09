@@ -409,7 +409,8 @@ function my_login_logo() { ?>
             background-size:cover;
             height: 100px;
             width: auto;
-            padding-bottom: 30px;
+            padding-bottom: 0px;
+            margin:0;
         }
     </style>
 <?php }
